@@ -1,14 +1,54 @@
 package com.crawler.ecommerce.parser;
 
 import com.crawler.ecommerce.core.UserAgent;
-import com.crawler.ecommerce.util.StringUtil;
+import com.crawler.ecommerce.ssl.SSLUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 public class AmazonParser {
+    static {
+        SSLUtils.trustAllHostnames();
+    }
+
+    private void parserPageOne(String url) throws Exception {
+        System.out.println("#####################" + url);
+        Document doc = Jsoup.connect(url)
+                .userAgent(UserAgent.getUserAgent())
+                .timeout(30000)
+                .get();
+
+        Elements elements = doc.select("div#mainResults > ul > li");
+
+        elements.stream().forEach(e -> {
+            String id = e.attr("data-asin");
+            String img = e.select("img.s-access-image").attr("src");
+            String text = e.select("h2.a-size-base.s-inline.s-access-title.a-text-normal").text();
+
+            Elements elePrice = e.select("a.a-link-normal.a-text-normal > span.a-size-base.a-color-price.s-price.a-text-bold");
+            String price = elePrice.text();
+
+            Elements eleRating = e.select("div.a-row.a-spacing-none > span[name=" + id +"]").select("span.a-icon-alt");
+            String rating = eleRating.text();
+
+            Elements eleComment = e.select("a[href*='customerReviews']");
+            String comment = eleComment.text();
+
+            String urlDetail = "https://www.amazon.co.uk/dp/%s/";
+            System.out.println(text);
+            System.out.println(id + " - " + img);
+            System.out.println(String.format(urlDetail, id));
+            System.out.println(price + " - " + rating + " - " + comment);
+            System.out.println("-----------------------");
+        });
+
+        System.out.println("[" + elements.size() + "]#####################" + url);
+    }
+
     public void read(String url) throws Exception {
+        System.out.println("#####################" + url);
+
         Document doc = Jsoup.connect(url)
                 .userAgent(UserAgent.getUserAgent())
                 .timeout(30000)
@@ -47,13 +87,20 @@ public class AmazonParser {
             System.out.println("-----------------------");
         });
 
-//        System.out.println(doc);
-        System.out.println(elements.size());
+        System.out.println("[" + elements.size() + "]#####################" + url);
     }
 
     public static void main(String[] args) {
         try {
-            new AmazonParser().read("https://www.amazon.co.uk/s?bbn=560798&rh=n%3A560798%2Cn%3A%21560800%2Cn%3A560858%2Cn%3A10392531&page=2");
+            AmazonParser amazonParser = new AmazonParser();
+            for (int i = 1; i <= 10; i++) {
+                if (i == 1) {
+                    amazonParser.parserPageOne("https://www.amazon.co.uk/s?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A560834%2Cn%3A376337011&page=" + i);
+                } else {
+                    amazonParser.read("https://www.amazon.co.uk/s?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A560834%2Cn%3A376337011&page=" + i);
+                }
+                Thread.sleep(5000);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
