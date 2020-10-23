@@ -5,6 +5,7 @@ public class Crawler {
     private String site;
     private String name;
     private String url;
+    private int page;
 
     public String getId() {
         return id;
@@ -36,5 +37,13 @@ public class Crawler {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
     }
 }

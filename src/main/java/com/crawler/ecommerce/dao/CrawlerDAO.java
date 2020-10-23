@@ -2,6 +2,8 @@ package com.crawler.ecommerce.dao;
 
 import com.crawler.ecommerce.core.ConnectionPool;
 import com.crawler.ecommerce.model.Crawler;
+import com.crawler.ecommerce.model.Data;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,7 @@ public class CrawlerDAO {
                 crawler.setName(resultSet.getString("name"));
                 crawler.setSite(resultSet.getString("site"));
                 crawler.setUrl(resultSet.getString("url"));
+                crawler.setPage(resultSet.getInt("page"));
                 crawlerList.add(crawler);
             }
         } catch (Exception ex) {
