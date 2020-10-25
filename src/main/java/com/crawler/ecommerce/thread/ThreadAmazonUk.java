@@ -2,19 +2,18 @@ package com.crawler.ecommerce.thread;
 
 
 import com.crawler.ecommerce.core.ShareQueue;
-import com.crawler.ecommerce.parser.AmazonParser;
+import com.crawler.ecommerce.parser.AmazonUkParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.util.List;
 
 public class ThreadAmazonUk implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ThreadAmazonUk.class);
-    private AmazonParser amazonParser = new AmazonParser();
+    private AmazonUkParser amazonParser = new AmazonUkParser();
 
     private String threadName = "THREAD_";
 

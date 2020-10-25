@@ -45,7 +45,7 @@
         </encoder>
     </appender>
     
-    <logger name="com.crawler.ecommerce" level="INFO">
+    <logger name="com.crawler.ecommerce" level="DEBUG">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="DEFAULT_LOG" />
     </logger>

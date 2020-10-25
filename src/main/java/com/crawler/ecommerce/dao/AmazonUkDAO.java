@@ -40,16 +40,16 @@ public class AmazonUkDAO {
             try (Connection con = ConnectionPool.getTransactional();
                  PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
-                pStmt.setString(0, data.getCode());
-                pStmt.setString(1, data.getName());
-                pStmt.setString(2, data.getImage());
-                pStmt.setString(3, data.getLink());
-                pStmt.setString(4, data.getPrice());
-                pStmt.setString(5, data.getRating());
-                pStmt.setInt(6, NumberUtils.toInt(data.getComment_count()));
-                pStmt.setString(7, data.getCategory());
-                pStmt.setString(8, "AMAZON_CO_UK");
-                pStmt.setInt(9, 0);
+                pStmt.setString(1, data.getCode());
+                pStmt.setString(2, data.getName());
+                pStmt.setString(3, data.getImage());
+                pStmt.setString(4, data.getLink());
+                pStmt.setString(5, data.getPrice());
+                pStmt.setString(6, data.getRating());
+                pStmt.setInt(7, NumberUtils.toInt(data.getComment_count()));
+                pStmt.setString(8, data.getCategory());
+                pStmt.setString(9, "AMAZON_CO_UK");
+                pStmt.setInt(10, 0);
 
                 pStmt.executeUpdate();
             } catch (Exception ex) {

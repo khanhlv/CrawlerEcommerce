@@ -66,7 +66,7 @@ public class CrawlerDAO {
                 queue.setCreatedDate(resultSet.getTimestamp("created_date"));
                 queue.setUpdatedDate(resultSet.getTimestamp("updated_date"));
 
-                updateQueueStatus(queue.getId());
+                updateQueueStatus(queue.getId(), 1);
 
                 queueList.add(queue);
             }
@@ -78,12 +78,28 @@ public class CrawlerDAO {
         return queueList;
     }
 
-    public void updateQueueStatus(int id) throws SQLException {
-        String sqlStory = "UPDATE queue SET status = 1 WHERE id = ?";
+    public void updateQueueStatus(int id, int status) throws SQLException {
+        String sqlStory = "UPDATE queue SET status = ? WHERE id = ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
-            pStmt.setInt(1, id);
+            pStmt.setInt(1, status);
+            pStmt.setInt(2, id);
+
+            pStmt.executeUpdate();
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    public void insertQueueStatus(Queue queue) throws SQLException {
+        String sqlStory = "INSERT INTO queue (link, size, status) VALUES (?,?,?)";
+        try (Connection con = ConnectionPool.getTransactional();
+             PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
+
+            pStmt.setString(1, queue.getLink());
+            pStmt.setInt(2, 0);
+            pStmt.setInt(3, 0);
 
             pStmt.executeUpdate();
         } catch (Exception ex) {
@@ -93,8 +109,23 @@ public class CrawlerDAO {
 
     public static void main(String[] args) {
         try {
-            new CrawlerDAO().queueList(5).stream().forEach(v -> {
-                System.out.println(v.getId());
+            CrawlerDAO crawlerDAO = new CrawlerDAO();
+
+            crawlerDAO.crawlerList().stream().forEach(v -> {
+                for (int i = 1; i <= v.getPage(); i++) {
+                    System.out.println(v.getUrl());
+                    String url = v.getUrl().replaceAll("#\\{page\\}", i + "");
+                    System.out.println(url);
+
+                    Queue queue = new Queue();
+                    queue.setLink(url);
+                    try {
+                        crawlerDAO.insertQueueStatus(queue);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+//                System.out.println(v.getUrl() + v.getPage());
             });
         } catch (SQLException e) {
             e.printStackTrace();
