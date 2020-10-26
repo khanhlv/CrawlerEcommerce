@@ -6,15 +6,11 @@ import com.crawler.ecommerce.dao.AmazonUkDAO;
 import com.crawler.ecommerce.dao.CrawlerDAO;
 import com.crawler.ecommerce.model.Data;
 import com.crawler.ecommerce.parser.AmazonUkParser;
-import com.crawler.ecommerce.util.GZipUtil;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.List;
 
 public class ThreadAmazonUk implements Runnable {
@@ -47,7 +43,9 @@ public class ThreadAmazonUk implements Runnable {
 
                         logger.debug(this.threadName + " ## GET_START [URL=" + link + "]");
 
-                        List<Data> listData = amazonParser.read(link);
+                        link = link.replaceAll("https://www\\.amazon\\.co\\.uk/s", "https://www.amazon.co.uk/s/query");
+
+                        List<Data> listData = amazonParser.readQuery(link);
 
                         if (listData.size() > 0) {
 
@@ -55,7 +53,7 @@ public class ThreadAmazonUk implements Runnable {
                                 amazonUkDAO.insert(result);
                             }
 
-                            logger.debug(this.threadName + " ## GET_START [URL={}] [SIZE={}]", link, listData.size());
+                            logger.debug(this.threadName + " ## GET_END [URL={}] [SIZE={}]", link, listData.size());
                         } else {
                             crawlerDAO.updateQueueStatus(id, 2);
                         }

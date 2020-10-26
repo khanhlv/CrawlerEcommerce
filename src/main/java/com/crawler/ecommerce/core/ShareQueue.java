@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public final class ShareQueue {
     public static ConcurrentLinkedDeque<String> shareQueue = new ConcurrentLinkedDeque<>();
-    public final static int QUEUE_SIZE = 5;
-    public final static int QUEUE_SIZE_LIMIT = 50;
+    public final static int QUEUE_SIZE = 1;
+    public final static int QUEUE_SIZE_LIMIT = 1;
 
     public static void addItem(List<Queue> queueList) {
         if (shareQueue.size() < QUEUE_SIZE_LIMIT) {
