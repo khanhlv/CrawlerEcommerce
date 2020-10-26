@@ -140,14 +140,14 @@ public class AmazonUkParser {
         dataMap.setComment_count(NumberUtils.toInt(comment));
         dataMap.setLink(String.format(urlDetail, id));
 
-        System.out.println("--------------------");
-        System.out.println(dataMap.getCode());
-        System.out.println(dataMap.getImage());
-        System.out.println(dataMap.getLink());
-        System.out.println(dataMap.getPrice());
-        System.out.println(dataMap.getName());
-        System.out.println(dataMap.getRating());
-        System.out.println(dataMap.getComment_count());
+//        System.out.println("--------------------");
+//        System.out.println(dataMap.getCode());
+//        System.out.println(dataMap.getImage());
+//        System.out.println(dataMap.getLink());
+//        System.out.println(dataMap.getPrice());
+//        System.out.println(dataMap.getName());
+//        System.out.println(dataMap.getRating());
+//        System.out.println(dataMap.getComment_count());
 
 //        logger.debug("DATA CODE[{}] PRICE [{}] RATE[{}] NAME[{}]", dataMap.getCode(), dataMap.getPrice(), dataMap.getRating(), dataMap.getName());
 
