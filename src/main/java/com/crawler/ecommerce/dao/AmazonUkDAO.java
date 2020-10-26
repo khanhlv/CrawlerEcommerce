@@ -20,7 +20,7 @@ public class AmazonUkDAO {
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
-            pStmt.setString(0, code);
+            pStmt.setString(1, code);
 
             if (pStmt.executeQuery().next()) {
                 return true;
@@ -35,8 +35,8 @@ public class AmazonUkDAO {
     public void insert(Data data) throws SQLException {
 
         if (!hasExistsCode(data.getCode())) {
-            String sqlStory = "INSERT INTO data_amazon_co_uk(code, name, image, link, price, rating, comment_count, category, site, status) " +
-                    "VALUES (?,?,?,?,?,?,?,?,?,0)";
+            String sqlStory = "INSERT INTO data_amazon_co_uk(code, name, image, link, price, rating, comment_count, site, status) " +
+                    "VALUES (?,?,?,?,?,?,?,?,0)";
             try (Connection con = ConnectionPool.getTransactional();
                  PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -44,12 +44,10 @@ public class AmazonUkDAO {
                 pStmt.setString(2, data.getName());
                 pStmt.setString(3, data.getImage());
                 pStmt.setString(4, data.getLink());
-                pStmt.setString(5, data.getPrice());
-                pStmt.setString(6, data.getRating());
-                pStmt.setInt(7, NumberUtils.toInt(data.getComment_count()));
-                pStmt.setString(8, data.getCategory());
-                pStmt.setString(9, "AMAZON_CO_UK");
-                pStmt.setInt(10, 0);
+                pStmt.setDouble(5, data.getPrice());
+                pStmt.setDouble(6, data.getRating());
+                pStmt.setInt(7, data.getComment_count());
+                pStmt.setString(8, "AMAZON_CO_UK");
 
                 pStmt.executeUpdate();
             } catch (Exception ex) {

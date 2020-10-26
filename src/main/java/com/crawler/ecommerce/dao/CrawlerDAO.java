@@ -59,7 +59,7 @@ public class CrawlerDAO {
                 queue.setLink(resultSet.getString("link"));
                 queue.setNote(resultSet.getString("note"));
                 queue.setSize(resultSet.getInt("size"));
-                queue.setStatus(resultSet.getInt("link"));
+                queue.setStatus(resultSet.getInt("status"));
 
                 queue.setCreatedAgent(resultSet.getString("created_agent"));
                 queue.setUpdatedAgent(resultSet.getString("updated_agent"));

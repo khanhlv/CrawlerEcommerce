@@ -121,7 +121,7 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>libs/</classpathPrefix>
                             <mainClass>
-                                com.ttruyen.execute.TruyenFullExecute
+                                com.crawler.ecommerce.Application
                             </mainClass>
                         </manifest>
                     </archive>

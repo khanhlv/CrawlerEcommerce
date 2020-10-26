@@ -2,12 +2,10 @@ package com.crawler.ecommerce.parser;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -29,7 +27,7 @@ public class AmazonUkParser {
 
     private List<Data> parserPageOne(Elements elements) {
 
-        List<Data> lisData = Collections.emptyList();
+        List<Data> lisData = new ArrayList<>();
 
         if (elements.size() > 0) {
             elements.stream().forEach(e -> {
@@ -54,7 +52,7 @@ public class AmazonUkParser {
     }
 
     public List<Data> read(String url) throws Exception {
-        List<Data> lisData = Collections.emptyList();
+        List<Data> lisData = new ArrayList<>();
 
         mapCookie.put("csm-hit", "tb:8K83R7438E4EWAHSHEY1+s-YR0GHGC4WK8R1Y02CTNB|1603636609137&t:1603636609137&adb:adblk_yes");
         mapCookie.put("session-id-time", "2082787201l");
@@ -74,10 +72,10 @@ public class AmazonUkParser {
                 .userAgent(UserAgent.getUserAgent())
                 .timeout(30000)
 //                .cookies(mapCookie)
-                .proxy(proxy)
+//                .proxy(proxy)
                 .get();
 
-        System.out.println(doc);
+//        System.out.println(doc);
 
         Elements elementsMainResults = doc.select("div#mainResults > ul > li");
 
@@ -125,17 +123,14 @@ public class AmazonUkParser {
         dataMap.setCode(id);
         dataMap.setName(text);
         dataMap.setImage(img);
-        dataMap.setPrice(price);
-        dataMap.setRating(rating);
-        dataMap.setComment_count(comment);
+        dataMap.setPrice(NumberUtils.toDouble(
+                price.replaceAll("\\s+", "").replaceAll("\\£", "")));
+        dataMap.setRating(NumberUtils.toDouble(
+                rating.replaceAll(" out of 5 stars", "").replaceAll("\\s+", "")));
+        dataMap.setComment_count(NumberUtils.toInt(comment));
         dataMap.setLink(String.format(urlDetail, id));
 
-        System.out.println(dataMap.getCode());
-        System.out.println(dataMap.getImage());
-        System.out.println(dataMap.getLink());
-        System.out.println(dataMap.getPrice());
-        System.out.println(dataMap.getName());
-        System.out.println(dataMap.getRating());
+//        logger.debug("DATA CODE[{}] PRICE [{}] RATE[{}] NAME[{}]", dataMap.getCode(), dataMap.getPrice(), dataMap.getRating(), dataMap.getName());
 
         return dataMap;
     }

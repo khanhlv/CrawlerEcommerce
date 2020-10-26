@@ -9,9 +9,9 @@ public class Data {
     private String properties;
     private String description;
     private String content;
-    private String price;
-    private String rating;
-    private String comment_count;
+    private double price;
+    private double rating;
+    private int comment_count;
     private String category;
     private String site;
     private String shop;
@@ -73,30 +73,6 @@ public class Data {
         this.content = content;
     }
 
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public String getRating() {
-        return rating;
-    }
-
-    public void setRating(String rating) {
-        this.rating = rating;
-    }
-
-    public String getComment_count() {
-        return comment_count;
-    }
-
-    public void setComment_count(String comment_count) {
-        this.comment_count = comment_count;
-    }
-
     public String getCategory() {
         return category;
     }
@@ -135,5 +111,29 @@ public class Data {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public int getComment_count() {
+        return comment_count;
+    }
+
+    public void setComment_count(int comment_count) {
+        this.comment_count = comment_count;
     }
 }
