@@ -2,7 +2,6 @@ package com.crawler.ecommerce.parser;
 
 import com.crawler.ecommerce.core.UserAgent;
 import com.crawler.ecommerce.model.Data;
-import com.crawler.ecommerce.ssl.SSLUtils;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -21,9 +20,9 @@ import java.util.Map;
 public class AmazonUkParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonUkParser.class);
 
-    static {
-        SSLUtils.trustAllHostnames();
-    }
+//    static {
+//        SSLUtils.trustAllHostnames();
+//    }
 
     private Map<String, String> mapCookie = new LinkedHashMap<>();
 
@@ -141,14 +140,14 @@ public class AmazonUkParser {
         dataMap.setComment_count(NumberUtils.toInt(comment));
         dataMap.setLink(String.format(urlDetail, id));
 
-//        System.out.println("--------------------");
-//        System.out.println(dataMap.getCode());
-//        System.out.println(dataMap.getImage());
-//        System.out.println(dataMap.getLink());
-//        System.out.println(dataMap.getPrice());
-//        System.out.println(dataMap.getName());
-//        System.out.println(dataMap.getRating());
-//        System.out.println(dataMap.getComment_count());
+        System.out.println("--------------------");
+        System.out.println(dataMap.getCode());
+        System.out.println(dataMap.getImage());
+        System.out.println(dataMap.getLink());
+        System.out.println(dataMap.getPrice());
+        System.out.println(dataMap.getName());
+        System.out.println(dataMap.getRating());
+        System.out.println(dataMap.getComment_count());
 
 //        logger.debug("DATA CODE[{}] PRICE [{}] RATE[{}] NAME[{}]", dataMap.getCode(), dataMap.getPrice(), dataMap.getRating(), dataMap.getName());
 
@@ -221,7 +220,7 @@ public class AmazonUkParser {
         try {
             AmazonUkParser amazonParser = new AmazonUkParser();
 //            amazonParser.read("https://www.amazon.co.uk/s?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A560834%2Cn%3A376337011&page=" + 1);
-            amazonParser.readQuery("https://www.amazon.co.uk/s/query?rh=n%3A560798%2Cn%3A!560800%2Cn%3A1345763031&page=27");
+            amazonParser.readQuery("https://www.amazon.co.uk/s/query?rh=n%3A560798%2Cn%3A!560800%2Cn%3A1345763031&page=290");
         } catch (Exception e) {
             e.printStackTrace();
         }

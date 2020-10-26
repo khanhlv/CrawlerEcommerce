@@ -48,15 +48,14 @@ public class ThreadAmazonUk implements Runnable {
                         List<Data> listData = amazonParser.readQuery(link);
 
                         if (listData.size() > 0) {
-
                             for (Data result : listData) {
                                 amazonUkDAO.insert(result);
                             }
-
-                            logger.debug(this.threadName + " ## GET_END [URL={}] [SIZE={}]", link, listData.size());
                         } else {
                             crawlerDAO.updateQueueStatus(id, 2);
                         }
+
+                        logger.debug(this.threadName + " ## GET_END [URL={}] [SIZE={}]", link, listData.size());
                     } catch (Exception ex) {
                         logger.error(this.threadName + " ## ERROR[" + link + "]", ex);
                         crawlerDAO.updateQueueStatus(id, -1);
