@@ -187,7 +187,6 @@ public class AmazonUkParser {
 
             if (value.indexOf("{") > 0) {
                 String d = value.substring(value.indexOf("{"), value.lastIndexOf("}") + 1);
-                System.out.println(d);
 
                 Query query = new Gson().fromJson(d, Query.class);
 
