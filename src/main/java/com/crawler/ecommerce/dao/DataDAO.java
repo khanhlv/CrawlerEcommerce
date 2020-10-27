@@ -1,22 +1,17 @@
 package com.crawler.ecommerce.dao;
 
+import com.crawler.ecommerce.core.ConnectionPool;
+import com.crawler.ecommerce.model.Data;
+import com.crawler.ecommerce.util.ResourceUtil;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.apache.commons.lang3.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.crawler.ecommerce.core.ConnectionPool;
-import com.crawler.ecommerce.model.Data;
-
-public class AmazonUkDAO {
-
-    private static final Logger logger = LoggerFactory.getLogger(AmazonUkDAO.class);
+public class DataDAO {
 
     public boolean hasExistsCode(String code) throws SQLException {
-        String sqlStory = "SELECT code FROM data_amazon_co_uk WHERE code = ?";
+        String sqlStory = "SELECT code FROM " + ResourceUtil.getValue("data.crawler.table") + " WHERE code = ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -35,8 +30,8 @@ public class AmazonUkDAO {
     public void insert(Data data) throws SQLException {
 
         if (!hasExistsCode(data.getCode())) {
-            String sqlStory = "INSERT INTO data_amazon_co_uk(code, name, image, link, price, rating, comment_count, site, status) " +
-                    "VALUES (?,?,?,?,?,?,?,?,0)";
+            String sqlStory = "INSERT INTO " + ResourceUtil.getValue("data.crawler.table") + "(code, name, image, link, price, rating, comment_count, site, category, status) " +
+                    "VALUES (?,?,?,?,?,?,?,?,?,0)";
             try (Connection con = ConnectionPool.getTransactional();
                  PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -47,7 +42,8 @@ public class AmazonUkDAO {
                 pStmt.setDouble(5, data.getPrice());
                 pStmt.setDouble(6, data.getRating());
                 pStmt.setInt(7, data.getComment_count());
-                pStmt.setString(8, "AMAZON_CO_UK");
+                pStmt.setString(8, data.getSite());
+                pStmt.setString(9, data.getCategory());
 
                 pStmt.executeUpdate();
             } catch (Exception ex) {

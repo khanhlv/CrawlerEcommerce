@@ -20,13 +20,7 @@ import java.util.Map;
 public class AmazonUkParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonUkParser.class);
 
-//    static {
-//        SSLUtils.trustAllHostnames();
-//    }
-
-    private Map<String, String> mapCookie = new LinkedHashMap<>();
-
-    private List<Data> parserPageOne(Elements elements) {
+    private List<Data> parserPageOne(Elements elements, String site) {
 
         List<Data> lisData = new ArrayList<>();
 
@@ -45,14 +39,14 @@ public class AmazonUkParser {
                 Elements eleComment = e.select("a[href*='customerReviews']");
                 String comment = eleComment.text();
 
-                lisData.add(toData(id, text, img, price, rating, comment));
+                lisData.add(toData(id, text, img, price, rating, comment, site));
             });
         }
 
         return lisData;
     }
 
-    private List<Data> parserPage(Elements elements) {
+    private List<Data> parserPage(Elements elements, String site) {
 
         List<Data> lisData = new ArrayList<>();
 
@@ -80,7 +74,7 @@ public class AmazonUkParser {
                     comment = eleRatingComment.get(1).attr("aria-label");
                 }
 
-                lisData.add(toData(id, text, img, price, rating, comment));
+                lisData.add(toData(id, text, img, price, rating, comment, site));
             });
         }
 
@@ -90,35 +84,21 @@ public class AmazonUkParser {
     public List<Data> read(String url) throws Exception {
         List<Data> lisData;
 
-        mapCookie.put("csm-hit", "tb:8K83R7438E4EWAHSHEY1+s-YR0GHGC4WK8R1Y02CTNB|1603636609137&t:1603636609137&adb:adblk_yes");
-        mapCookie.put("session-id-time", "2082787201l");
-        mapCookie.put("session-token", "Lk/rliHVVjUmDvgOqrB8Jvm8uMFzzqNfwFOFjT4W62igE1s8llYBxX188RZPjpE661htVMKcILvNCeiclS8HiK7vE6WQeHtuVfbAVd2tOt9iovHzMDsAlt5FmWD/OkR9+LcpQL51iwuKCyHlv4mHHyBOUMvN+i1wrizFeqZ3rL/JBl1ysGdyZUQ3bH7rWuZY");
-        mapCookie.put("session-id", "261-6461202-0118328");
-        mapCookie.put("lc-acbuk", "en_GB");
-        mapCookie.put("ubid-acbuk", "259-8594840-8665335");
-        mapCookie.put("tooltipShownBefore", "true");
-        mapCookie.put("i18n-prefs", "GBP");
-
         logger.debug("URL [{}]", url);
-
-//        Proxy proxy = new Proxy(Proxy.Type.HTTP,
-//                new InetSocketAddress("72.249.235.194", 54321));
 
         Document doc = Jsoup.connect(url)
                 .userAgent(UserAgent.getUserAgent())
                 .timeout(30000)
-//                .cookies(mapCookie)
-//                .proxy(proxy)
                 .get();
 
         Elements elementsMainResults = doc.select("div#mainResults > ul > li");
 
         if (elementsMainResults.size() > 0) {
-            lisData = parserPageOne(elementsMainResults);
+            lisData = parserPageOne(elementsMainResults, url);
         } else {
             Elements elements = doc.select("div[data-component-type=\"s-search-result\"]");
 
-            lisData = parserPage(elements);
+            lisData = parserPage(elements, url);
         }
 
         logger.debug("URL [{}] SIZE [{}]", url, lisData.size());
@@ -126,7 +106,7 @@ public class AmazonUkParser {
         return lisData;
     }
 
-    private Data toData(String id, String text, String img, String price, String rating, String comment) {
+    private Data toData(String id, String text, String img, String price, String rating, String comment, String site) {
         String urlDetail = "https://www.amazon.co.uk/dp/%s/";
 
         Data dataMap = new Data();
@@ -139,15 +119,16 @@ public class AmazonUkParser {
                 rating.replaceAll(" out of 5 stars", "").replaceAll("\\s+", "")));
         dataMap.setComment_count(NumberUtils.toInt(comment));
         dataMap.setLink(String.format(urlDetail, id));
+        dataMap.setSite(site);
 
-//        System.out.println("--------------------");
-//        System.out.println(dataMap.getCode());
-//        System.out.println(dataMap.getImage());
-//        System.out.println(dataMap.getLink());
-//        System.out.println(dataMap.getPrice());
-//        System.out.println(dataMap.getName());
-//        System.out.println(dataMap.getRating());
-//        System.out.println(dataMap.getComment_count());
+        System.out.println("--------------------");
+        System.out.println(dataMap.getCode());
+        System.out.println(dataMap.getImage());
+        System.out.println(dataMap.getLink());
+        System.out.println(dataMap.getPrice());
+        System.out.println(dataMap.getName());
+        System.out.println(dataMap.getRating());
+        System.out.println(dataMap.getComment_count());
 
 //        logger.debug("DATA CODE[{}] PRICE [{}] RATE[{}] NAME[{}]", dataMap.getCode(), dataMap.getPrice(), dataMap.getRating(), dataMap.getName());
 
@@ -209,7 +190,7 @@ public class AmazonUkParser {
                     Elements eleComment = e.select("a[href*='customerReviews']");
                     String comment = eleComment.text();
 
-                    lisData.add(toData(id, text, img, price, rating, comment));
+                    lisData.add(toData(id, text, img, price, rating, comment, url));
                 }
             }
         }
@@ -220,7 +201,7 @@ public class AmazonUkParser {
         try {
             AmazonUkParser amazonParser = new AmazonUkParser();
 //            amazonParser.read("https://www.amazon.co.uk/s?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A560834%2Cn%3A376337011&page=" + 1);
-            amazonParser.readQuery("https://www.amazon.co.uk/s/query?rh=n%3A560798%2Cn%3A!560800%2Cn%3A1345763031&page=290");
+            amazonParser.readQuery("https://www.amazon.co.uk/s/query?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A1345763031&page=32");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -2,7 +2,7 @@ package com.crawler.ecommerce.thread;
 
 
 import com.crawler.ecommerce.core.ShareQueue;
-import com.crawler.ecommerce.dao.AmazonUkDAO;
+import com.crawler.ecommerce.dao.DataDAO;
 import com.crawler.ecommerce.dao.CrawlerDAO;
 import com.crawler.ecommerce.model.Data;
 import com.crawler.ecommerce.parser.AmazonUkParser;
@@ -17,7 +17,7 @@ public class ThreadAmazonUk implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ThreadAmazonUk.class);
     private AmazonUkParser amazonParser = new AmazonUkParser();
-    private AmazonUkDAO amazonUkDAO = new AmazonUkDAO();
+    private DataDAO dataDAO = new DataDAO();
     private CrawlerDAO crawlerDAO = new CrawlerDAO();
 
     private String threadName = "THREAD_";
@@ -39,6 +39,7 @@ public class ThreadAmazonUk implements Runnable {
                     String[] str = StringUtils.split(data,"\\|");
                     int id = NumberUtils.toInt(str[0]);
                     String link = str[1];
+                    String category = str[2];
                     try {
 
                         logger.debug(this.threadName + " ## GET_START [URL=" + link + "]");
@@ -49,7 +50,8 @@ public class ThreadAmazonUk implements Runnable {
 
                         if (listData.size() > 0) {
                             for (Data result : listData) {
-                                amazonUkDAO.insert(result);
+                                result.setCategory(category);
+                                dataDAO.insert(result);
                             }
                         } else {
                             crawlerDAO.updateQueueStatus(id, 2);
@@ -60,7 +62,7 @@ public class ThreadAmazonUk implements Runnable {
                         logger.error(this.threadName + " ## ERROR[" + link + "]", ex);
                         crawlerDAO.updateQueueStatus(id, -1);
                     }
-                    Thread.sleep( 1000);
+                    Thread.sleep( 500);
                 }
 
                 Thread.sleep( 5000);

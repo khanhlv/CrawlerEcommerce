@@ -14,7 +14,7 @@ public final class ShareQueue {
     public static void addItem(List<Queue> queueList) {
         if (shareQueue.size() < QUEUE_SIZE_LIMIT) {
             for (Queue queue : queueList) {
-                String link = queue.getId() + "|" + queue.getLink();
+                String link = queue.getId() + "|" + queue.getLink() + "|" + queue.getName();
                 if (!shareQueue.contains(link)) {
                     shareQueue.add(link);
                 }

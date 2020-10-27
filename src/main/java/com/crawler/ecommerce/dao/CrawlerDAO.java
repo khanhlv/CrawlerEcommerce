@@ -3,9 +3,11 @@ package com.crawler.ecommerce.dao;
 import com.crawler.ecommerce.core.ConnectionPool;
 import com.crawler.ecommerce.model.Crawler;
 import com.crawler.ecommerce.model.Queue;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,14 +59,8 @@ public class CrawlerDAO {
                 Queue queue = new Queue();
                 queue.setId(resultSet.getInt("id"));
                 queue.setLink(resultSet.getString("link"));
-                queue.setNote(resultSet.getString("note"));
-                queue.setSize(resultSet.getInt("size"));
                 queue.setStatus(resultSet.getInt("status"));
-
-                queue.setCreatedAgent(resultSet.getString("created_agent"));
-                queue.setUpdatedAgent(resultSet.getString("updated_agent"));
-                queue.setCreatedDate(resultSet.getTimestamp("created_date"));
-                queue.setUpdatedDate(resultSet.getTimestamp("updated_date"));
+                queue.setName(resultSet.getString("name"));
 
                 updateQueueStatus(queue.getId(), 1);
 
@@ -93,12 +89,12 @@ public class CrawlerDAO {
     }
 
     public void insertQueueStatus(Queue queue) throws SQLException {
-        String sqlStory = "INSERT INTO queue (link, size, status) VALUES (?,?,?)";
+        String sqlStory = "INSERT INTO queue (link, name, status) VALUES (?,?,?)";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
             pStmt.setString(1, queue.getLink());
-            pStmt.setInt(2, 0);
+            pStmt.setString(2, queue.getName());
             pStmt.setInt(3, 0);
 
             pStmt.executeUpdate();
@@ -111,23 +107,20 @@ public class CrawlerDAO {
         try {
             CrawlerDAO crawlerDAO = new CrawlerDAO();
 
+            StringBuilder data = new StringBuilder();
             crawlerDAO.crawlerList().stream().forEach(v -> {
-                for (int i = 1; i <= v.getPage(); i++) {
+                for (int i = 2; i <= v.getPage(); i++) {
                     System.out.println(v.getUrl());
                     String url = v.getUrl().replaceAll("#\\{page\\}", i + "");
                     System.out.println(url);
 
-                    Queue queue = new Queue();
-                    queue.setLink(url);
-                    try {
-                        crawlerDAO.insertQueueStatus(queue);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    data.append(String.format("INSERT INTO queue (link, name, status) VALUES ('%s','%s',0);\n", url, v.getName()));
                 }
-//                System.out.println(v.getUrl() + v.getPage());
             });
-        } catch (SQLException e) {
+
+            FileUtils.writeStringToFile(new File("data/queue.sql"), data.toString());
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
