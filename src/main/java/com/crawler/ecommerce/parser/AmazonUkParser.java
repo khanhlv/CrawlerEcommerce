@@ -170,22 +170,22 @@ public class AmazonUkParser {
 
                 if (StringUtils.isNotBlank(query.getAsin())) {
 
-                    Document doc = Jsoup.parse(query.getHtml());
+//                    FileUtils.writeStringToFile(new File("data/data.html"), query.getHtml());
 
-                    Elements e = doc.select("div[data-component-type=\"s-search-result\"]");
+                    Document doc = Jsoup.parse(query.getHtml());
 
                     String id = query.getAsin();
 
-                    String img = e.select("div.s-image-fixed-height img").attr("src");
-                    String text = e.select("span.a-size-medium.a-color-base.a-text-normal").text();
+                    String img = doc.select("img").attr("src");
+                    String text = doc.select("span.a-color-base.a-text-normal").text();
 
-                    Elements elePrice = e.select("span.a-price > span.a-offscreen");
+                    Elements elePrice = doc.select("span.a-price > span.a-offscreen");
                     String price = elePrice.text();
 
-                    Elements eleRating = e.select("a.a-popover-trigger.a-declarative").select("span.a-icon-alt");
+                    Elements eleRating = doc.select("a.a-popover-trigger.a-declarative").select("span.a-icon-alt");
                     String rating = eleRating.text();
 
-                    Elements eleComment = e.select("a[href*='customerReviews']");
+                    Elements eleComment = doc.select("a[href*='customerReviews']");
                     String comment = eleComment.text();
 
                     lisData.add(toData(id, text, img, price, rating, comment, url));
