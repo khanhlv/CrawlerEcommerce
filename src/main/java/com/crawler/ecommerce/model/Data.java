@@ -1,7 +1,7 @@
 package com.crawler.ecommerce.model;
 
 public class Data {
-    private String id;
+    private int id;
     private String name;
     private String code;
     private String image;
@@ -15,13 +15,13 @@ public class Data {
     private String category;
     private String site;
     private String shop;
-    private String status;
+    private int status;
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -97,11 +97,11 @@ public class Data {
         this.shop = shop;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 

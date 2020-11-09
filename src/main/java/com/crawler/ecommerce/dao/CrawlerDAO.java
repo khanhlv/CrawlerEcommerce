@@ -103,14 +103,37 @@ public class CrawlerDAO {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            CrawlerDAO crawlerDAO = new CrawlerDAO();
+    public void insertQueueBatch() throws SQLException {
+        String sqlStory = "INSERT INTO queue (link, name, status) VALUES (?,?,?)";
 
+        List<Crawler> crawlerList = crawlerList();
+        try (Connection con = ConnectionPool.getTransactional();
+             PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
+
+            for (Crawler crawler : crawlerList) {
+                for (int i = 2; i <= crawler.getPage(); i++) {
+                    String url = crawler.getUrl().replaceAll("#\\{page\\}", i + "");
+
+                    pStmt.setString(1, url);
+                    pStmt.setString(2, crawler.getName());
+                    pStmt.setInt(3, 0);
+
+                    pStmt.addBatch();
+                }
+                System.out.println("DONE - " + crawler.getUrl());
+                pStmt.executeBatch();
+            }
+        } catch (Exception ex) {
+            throw ex;
+        }
+
+    }
+
+    public void insertQueueFile() throws Exception {
+        try {
             StringBuilder data = new StringBuilder();
-            crawlerDAO.crawlerList().stream().forEach(v -> {
+            crawlerList().stream().forEach(v -> {
                 for (int i = 2; i <= v.getPage(); i++) {
-                    System.out.println(v.getUrl());
                     String url = v.getUrl().replaceAll("#\\{page\\}", i + "");
                     System.out.println(url);
 
@@ -119,6 +142,16 @@ public class CrawlerDAO {
             });
 
             FileUtils.writeStringToFile(new File("data/queue.sql"), data.toString());
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            CrawlerDAO crawlerDAO = new CrawlerDAO();
+
+            crawlerDAO.insertQueueFile();
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -2,13 +2,88 @@ package com.crawler.ecommerce.dao;
 
 import com.crawler.ecommerce.core.ConnectionPool;
 import com.crawler.ecommerce.model.Data;
+import com.crawler.ecommerce.model.Queue;
 import com.crawler.ecommerce.util.ResourceUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DataDAO {
+
+    public List<Data> queueList(int limit) throws SQLException {
+
+        List<Data> dataList = new ArrayList<>();
+        String sqlStory = "SELECT * FROM " + ResourceUtil.getValue("data.crawler.table") + " WHERE status = 0 LIMIT ?";
+        try (Connection con = ConnectionPool.getTransactional();
+             PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
+
+            pStmt.setInt(1, limit);
+
+            ResultSet resultSet = pStmt.executeQuery();
+            while(resultSet.next()) {
+
+                Data data = new Data();
+                data.setId(resultSet.getInt("id"));
+                data.setCode(resultSet.getString("code"));
+                data.setName(resultSet.getString("name"));
+                data.setImage(resultSet.getString("image"));
+                data.setLink(resultSet.getString("link"));
+                data.setProperties(resultSet.getString("properties"));
+                data.setDescription(resultSet.getString("description"));
+                data.setContent(resultSet.getString("content"));
+                data.setPrice(resultSet.getDouble("price"));
+                data.setRating(resultSet.getDouble("rating"));
+                data.setComment_count(resultSet.getInt("comment_count"));
+                data.setCategory(resultSet.getString("category"));
+                data.setSite(resultSet.getString("site"));
+                data.setShop(resultSet.getString("shop"));
+                data.setStatus(resultSet.getInt("status"));
+
+                dataList.add(data);
+            }
+
+            resultSet.close();
+        } catch (Exception ex) {
+            throw ex;
+        }
+
+        return dataList;
+    }
+
+    public void updateData(Data data) throws SQLException {
+        String sqlStory = "UPDATE " + ResourceUtil.getValue("data.crawler.table") + " SET price = ?, properties = ?, description = ?, shop = ?, status = 1 WHERE id = ?";
+        try (Connection con = ConnectionPool.getTransactional();
+             PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
+
+            pStmt.setDouble(1, data.getPrice());
+            pStmt.setString(2, data.getProperties());
+            pStmt.setString(3, data.getDescription());
+            pStmt.setString(4, data.getShop());
+            pStmt.setInt(5, data.getId());
+
+            pStmt.executeUpdate();
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    public void updateDataStatus(int id, int status) throws SQLException {
+        String sqlStory = "UPDATE " + ResourceUtil.getValue("data.crawler.table") + " SET status = ? WHERE id = ?";
+        try (Connection con = ConnectionPool.getTransactional();
+             PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
+
+            pStmt.setInt(1, status);
+            pStmt.setInt(2, id);
+
+            pStmt.executeUpdate();
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
 
     public boolean hasExistsCode(String code) throws SQLException {
         String sqlStory = "SELECT code FROM " + ResourceUtil.getValue("data.crawler.table") + " WHERE code = ?";
