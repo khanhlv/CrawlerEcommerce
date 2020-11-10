@@ -26,7 +26,7 @@ public class ThreadAmazonUkDetail implements Runnable {
     public void run() {
         try {
             while (true) {
-                List<Data> contentList = dataDAO.queueList(10);
+                List<Data> contentList = dataDAO.queueList(100);
 
                 for(Data data : contentList){
                     try {
