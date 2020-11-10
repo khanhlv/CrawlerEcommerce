@@ -26,7 +26,7 @@ public class ThreadAmazonUkDetail implements Runnable {
     public void run() {
         try {
             while (true) {
-                List<Data> contentList = dataDAO.queueList(100);
+                List<Data> contentList = dataDAO.queueList(10);
 
                 for(Data data : contentList){
                     try {
@@ -39,6 +39,12 @@ public class ThreadAmazonUkDetail implements Runnable {
                         long end = System.currentTimeMillis() - start;
 
                         logger.debug(this.threadName + "## GET_END [URL=" + data.getLink() + "][TIME=" + end  + "]");
+
+                        if (content.getPrice() <= 0) {
+                            dataDAO.updateDataStatus(data.getId(), 2);
+                        } else {
+                            dataDAO.updateData(content);
+                        }
 
                         dataDAO.updateData(content);
 

@@ -179,7 +179,7 @@ public class AmazonUkParser {
 
                     listAttr.add(mapAttr);
 
-                    System.out.println(textAttr + " - " + codeAttr + " - " + priceAttr + " - " + urlAttr);
+//                    System.out.println(textAttr + " - " + codeAttr + " - " + priceAttr + " - " + urlAttr);
                 });
 
                 mapData.put(key, listAttr);
@@ -195,7 +195,12 @@ public class AmazonUkParser {
         dataMap.setRating(rating);
         dataMap.setComment_count(count_comment);
         dataMap.setShop(shop);
-        dataMap.setDescription(description);
+
+        String characterFilter = "[^\\p{L}\\p{M}\\p{N}\\p{P}\\p{Z}\\p{Cf}\\p{Cs}\\s]";
+        String emotionless = description.replaceAll(characterFilter,"");
+
+        dataMap.setDescription(emotionless);
+
 //        System.out.println("--------------------");
 //        System.out.println(dataMap.getCode());
 //        System.out.println(dataMap.getPrice());
@@ -205,7 +210,8 @@ public class AmazonUkParser {
 //        System.out.println(dataMap.getDescription());
 //        System.out.println(dataMap.getProperties());
 
-        logger.debug("URL_DETAIL [{}] PRICE[{}] RATE[{} - {}] SHOP[{}]", url, dataMap.getPrice(), dataMap.getRating(), dataMap.getComment_count(), dataMap.getShop());
+        logger.debug("URL_DETAIL [{}] PRICE[{}] RATE[{} - {}] SHOP[{}] PROPERTIES[{}]", url, dataMap.getPrice(), dataMap.getRating(),
+                dataMap.getComment_count(), dataMap.getShop(), StringUtils.isNotBlank(dataMap.getProperties()));
 
         return dataMap;
     }
@@ -305,7 +311,7 @@ public class AmazonUkParser {
             AmazonUkParser amazonParser = new AmazonUkParser();
 //            amazonParser.read("https://www.amazon.co.uk/s?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A560834%2Cn%3A376337011&page=" + 1);
 //            amazonParser.readQuery("https://www.amazon.co.uk/s/query?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A1345763031&page=32");
-            amazonParser.readDetail("https://www.amazon.co.uk/dp/B07X5TH2G1", "B07X5TH2G1", 1);
+            amazonParser.readDetail("https://www.amazon.co.uk/dp/B07SB3JC45", "B07SB3JC45", 1);
 
         } catch (Exception e) {
             e.printStackTrace();
