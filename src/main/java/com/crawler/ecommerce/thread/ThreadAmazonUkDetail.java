@@ -1,14 +1,13 @@
 package com.crawler.ecommerce.thread;
 
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.crawler.ecommerce.dao.DataDAO;
 import com.crawler.ecommerce.model.Data;
 import com.crawler.ecommerce.parser.AmazonUkParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class ThreadAmazonUkDetail implements Runnable {
 
@@ -35,22 +34,15 @@ public class ThreadAmazonUkDetail implements Runnable {
 
                         long start = System.currentTimeMillis();
 
-                        //TODO: chinh sua sau
-                        Data content = amazonParser.read(data.getLink()).get(0);
-
-                        content.setId(data.getId());
+                        Data content = amazonParser.readDetail(data.getLink(), data.getCode(), data.getId());
 
                         long end = System.currentTimeMillis() - start;
 
                         logger.debug(this.threadName + "## GET_END [URL=" + data.getLink() + "][TIME=" + end  + "]");
 
-                        if (content.getPrice() <= 0) {
-                            dataDAO.updateDataStatus(data.getId(), 2);
-                        } else {
-                            dataDAO.updateData(content);
-                        }
+                        dataDAO.updateData(content);
 
-                        Thread.sleep(250);
+                        Thread.sleep(200);
                     } catch (Exception ex) {
                         logger.error(this.threadName + " ## ERROR[" + data.getLink() + "]", ex);
                         dataDAO.updateDataStatus(data.getId(), -1);

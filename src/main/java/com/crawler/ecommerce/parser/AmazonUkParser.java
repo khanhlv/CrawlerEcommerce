@@ -1,10 +1,8 @@
 package com.crawler.ecommerce.parser;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.crawler.ecommerce.core.UserAgent;
+import com.crawler.ecommerce.model.Data;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Connection;
@@ -14,9 +12,10 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.crawler.ecommerce.core.UserAgent;
-import com.crawler.ecommerce.model.Data;
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AmazonUkParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonUkParser.class);
@@ -108,8 +107,6 @@ public class AmazonUkParser {
     }
 
     public Data readDetail(String url, String code, int id) throws Exception {
-        logger.debug("URL_DETAIL [{}]", url);
-
         Data dataMap = new Data();
 
         String userAgent = UserAgent.getUserAgent();
@@ -134,36 +131,81 @@ public class AmazonUkParser {
                 .timeout(30000)
                 .get();
 
-        double price = NumberUtils.toDouble(doc.select("span#priceblock_saleprice").text().trim()
-                .replaceAll("\\s+", "").replaceAll("\\£", ""));
-        String properties = doc.select("div#twisterContainer").text();
+        String priceText = doc.select("span#priceblock_saleprice").text().trim();
+
+        if (StringUtils.isBlank(priceText)) {
+            priceText = doc.select("span#priceblock_ourprice").text().trim();
+        }
+
+        double price = NumberUtils.toDouble(priceText.replaceAll("\\s+", "").replaceAll("\\£", ""));
         String description = doc.select("div#feature-bullets").text();
-        System.out.println(doc.select("div#aplus").text());
-        String content = doc.select("div#aplus3p_feature_div").outerHtml();
+
         String shop = doc.select("a#sellerProfileTriggerId").text().trim();
         double rating = NumberUtils.toDouble(doc.select("span#acrPopover").attr("title").trim()
                 .replaceAll(" out of 5 stars", "").replaceAll("\\s+", ""));
         int count_comment = NumberUtils.toInt(doc.select("span#acrCustomerReviewText").text().trim().replaceAll("[^0-9]+", ""));
+
+        Elements propertiesElements = doc.select("div#twisterContainer ul");
+
+        String urlDetail = "https://www.amazon.co.uk/dp/%s/";
+
+        if (propertiesElements.size() > 0) {
+            Map<String, List<Map>> mapData = new LinkedHashMap<>();
+            propertiesElements.forEach(els -> {
+                String key = els.attr("data-a-button-group")
+                        .replaceAll("\\{\"name\":\"twister_", "")
+                        .replaceAll("\"}", "");
+
+                Elements elementsLi = els.select("li");
+
+                List<Map> listAttr = new ArrayList<>();
+                elementsLi.forEach(dataEle -> {
+                    Map<String, String> mapAttr = new LinkedHashMap<>();
+                    String textAttr = dataEle.select("img.imgSwatch").attr("alt").trim();
+
+                    if (StringUtils.isBlank(textAttr)) {
+                        textAttr = dataEle.select("button div.twisterTextDiv").text().trim();
+                    }
+
+                    String priceAttr = dataEle.select("button span.twisterSwatchPrice").text().trim();
+
+                    String codeAttr = dataEle.attr("data-defaultasin").trim();
+                    String urlAttr = String.format(urlDetail, codeAttr);
+
+                    mapAttr.put("text", textAttr);
+                    mapAttr.put("price", priceAttr);
+                    mapAttr.put("code", codeAttr);
+                    mapAttr.put("urlAttr", urlAttr);
+
+                    listAttr.add(mapAttr);
+
+                    System.out.println(textAttr + " - " + codeAttr + " - " + priceAttr + " - " + urlAttr);
+                });
+
+                mapData.put(key, listAttr);
+            });
+            dataMap.setProperties(new Gson().toJson(mapData));
+        } else {
+            dataMap.setProperties("");
+        }
 
         dataMap.setId(id);
         dataMap.setCode(code);
         dataMap.setPrice(price);
         dataMap.setRating(rating);
         dataMap.setComment_count(count_comment);
-        dataMap.setContent(content);
         dataMap.setShop(shop);
         dataMap.setDescription(description);
-        dataMap.setProperties(properties);
+//        System.out.println("--------------------");
+//        System.out.println(dataMap.getCode());
+//        System.out.println(dataMap.getPrice());
+//        System.out.println(dataMap.getRating());
+//        System.out.println(dataMap.getComment_count());
+//        System.out.println(dataMap.getShop());
+//        System.out.println(dataMap.getDescription());
+//        System.out.println(dataMap.getProperties());
 
-        System.out.println("--------------------");
-        System.out.println(dataMap.getCode());
-        System.out.println(dataMap.getPrice());
-        System.out.println(dataMap.getRating());
-        System.out.println(dataMap.getComment_count());
-        System.out.println(dataMap.getShop());
-        System.out.println(dataMap.getDescription());
-        System.out.println(dataMap.getProperties());
-        System.out.println(dataMap.getContent());
+        logger.debug("URL_DETAIL [{}] PRICE[{}] RATE[{} - {}] SHOP[{}]", url, dataMap.getPrice(), dataMap.getRating(), dataMap.getComment_count(), dataMap.getShop());
 
         return dataMap;
     }
@@ -263,7 +305,7 @@ public class AmazonUkParser {
             AmazonUkParser amazonParser = new AmazonUkParser();
 //            amazonParser.read("https://www.amazon.co.uk/s?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A560834%2Cn%3A376337011&page=" + 1);
 //            amazonParser.readQuery("https://www.amazon.co.uk/s/query?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A1345763031&page=32");
-            amazonParser.readDetail("https://www.amazon.co.uk/dp/B07GYS426K", "B07GYS426K", 1);
+            amazonParser.readDetail("https://www.amazon.co.uk/dp/B07X5TH2G1", "B07X5TH2G1", 1);
 
         } catch (Exception e) {
             e.printStackTrace();

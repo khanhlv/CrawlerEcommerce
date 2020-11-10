@@ -2,7 +2,6 @@ package com.crawler.ecommerce.dao;
 
 import com.crawler.ecommerce.core.ConnectionPool;
 import com.crawler.ecommerce.model.Data;
-import com.crawler.ecommerce.model.Queue;
 import com.crawler.ecommerce.util.ResourceUtil;
 
 import java.sql.Connection;
@@ -55,7 +54,7 @@ public class DataDAO {
     }
 
     public void updateData(Data data) throws SQLException {
-        String sqlStory = "UPDATE " + ResourceUtil.getValue("data.crawler.table") + " SET price = ?, properties = ?, description = ?, shop = ?, status = 1 WHERE id = ?";
+        String sqlStory = "UPDATE " + ResourceUtil.getValue("data.crawler.table") + " SET price = ?, properties = ?, description = ?, shop = ?, rating = ?, comment_count = ?, status = 1, updated_date = now() WHERE id = ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -63,7 +62,10 @@ public class DataDAO {
             pStmt.setString(2, data.getProperties());
             pStmt.setString(3, data.getDescription());
             pStmt.setString(4, data.getShop());
-            pStmt.setInt(5, data.getId());
+            pStmt.setDouble(5, data.getRating());
+            pStmt.setInt(6, data.getComment_count());
+
+            pStmt.setInt(7, data.getId());
 
             pStmt.executeUpdate();
         } catch (Exception ex) {
