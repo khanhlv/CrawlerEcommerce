@@ -1,8 +1,10 @@
 package com.crawler.ecommerce.parser;
 
-import com.crawler.ecommerce.core.UserAgent;
-import com.crawler.ecommerce.model.Data;
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Connection;
@@ -12,10 +14,9 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.crawler.ecommerce.core.UserAgent;
+import com.crawler.ecommerce.model.Data;
+import com.google.gson.Gson;
 
 public class AmazonUkParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonUkParser.class);
@@ -106,6 +107,67 @@ public class AmazonUkParser {
         return lisData;
     }
 
+    public Data readDetail(String url, String code, int id) throws Exception {
+        logger.debug("URL_DETAIL [{}]", url);
+
+        Data dataMap = new Data();
+
+        String userAgent = UserAgent.getUserAgent();
+
+        // Cookie
+        Connection.Response response = Jsoup.connect("https://www.amazon.co.uk/cookieprefs?ref_=portal_banner_all")
+                .userAgent(userAgent)
+                .timeout(30000)
+                .header("X-Requested-With", "XMLHttpRequest")
+                .header("TE", "Trailers")
+                .header("origin", "https://www.amazon.co.uk")
+                .header("referer", "https://www.amazon.co.uk")
+                .ignoreContentType(true)
+                .method(Connection.Method.POST)
+                .execute();
+
+        Map<String, String> cookies = response.cookies();
+
+        Document doc = Jsoup.connect(url)
+                .userAgent(userAgent)
+                .cookies(cookies)
+                .timeout(30000)
+                .get();
+
+        double price = NumberUtils.toDouble(doc.select("span#priceblock_saleprice").text().trim()
+                .replaceAll("\\s+", "").replaceAll("\\£", ""));
+        String properties = doc.select("div#twisterContainer").text();
+        String description = doc.select("div#feature-bullets").text();
+        System.out.println(doc.select("div#aplus").text());
+        String content = doc.select("div#aplus3p_feature_div").outerHtml();
+        String shop = doc.select("a#sellerProfileTriggerId").text().trim();
+        double rating = NumberUtils.toDouble(doc.select("span#acrPopover").attr("title").trim()
+                .replaceAll(" out of 5 stars", "").replaceAll("\\s+", ""));
+        int count_comment = NumberUtils.toInt(doc.select("span#acrCustomerReviewText").text().trim().replaceAll("[^0-9]+", ""));
+
+        dataMap.setId(id);
+        dataMap.setCode(code);
+        dataMap.setPrice(price);
+        dataMap.setRating(rating);
+        dataMap.setComment_count(count_comment);
+        dataMap.setContent(content);
+        dataMap.setShop(shop);
+        dataMap.setDescription(description);
+        dataMap.setProperties(properties);
+
+        System.out.println("--------------------");
+        System.out.println(dataMap.getCode());
+        System.out.println(dataMap.getPrice());
+        System.out.println(dataMap.getRating());
+        System.out.println(dataMap.getComment_count());
+        System.out.println(dataMap.getShop());
+        System.out.println(dataMap.getDescription());
+        System.out.println(dataMap.getProperties());
+        System.out.println(dataMap.getContent());
+
+        return dataMap;
+    }
+
     private Data toData(String id, String text, String img, String price, String rating, String comment, String site) {
         String urlDetail = "https://www.amazon.co.uk/dp/%s/";
 
@@ -155,6 +217,7 @@ public class AmazonUkParser {
                 .timeout(30000)
                 .headers(mapHeader)
                 .ignoreContentType(true)
+                .method(Connection.Method.POST)
                 .execute();
 
         String body = resp.body();
@@ -199,7 +262,9 @@ public class AmazonUkParser {
         try {
             AmazonUkParser amazonParser = new AmazonUkParser();
 //            amazonParser.read("https://www.amazon.co.uk/s?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A560834%2Cn%3A376337011&page=" + 1);
-            amazonParser.readQuery("https://www.amazon.co.uk/s/query?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A1345763031&page=32");
+//            amazonParser.readQuery("https://www.amazon.co.uk/s/query?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A1345763031&page=32");
+            amazonParser.readDetail("https://www.amazon.co.uk/dp/B07GYS426K", "B07GYS426K", 1);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
