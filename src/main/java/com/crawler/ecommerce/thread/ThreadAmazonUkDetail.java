@@ -1,13 +1,16 @@
 package com.crawler.ecommerce.thread;
 
 
-import com.crawler.ecommerce.dao.DataDAO;
-import com.crawler.ecommerce.model.Data;
-import com.crawler.ecommerce.parser.AmazonUkParser;
+import java.util.List;
+
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import com.crawler.ecommerce.dao.DataDAO;
+import com.crawler.ecommerce.model.Data;
+import com.crawler.ecommerce.parser.AmazonUkParser;
+import com.crawler.ecommerce.util.ResourceUtil;
 
 public class ThreadAmazonUkDetail implements Runnable {
 
@@ -26,7 +29,9 @@ public class ThreadAmazonUkDetail implements Runnable {
     public void run() {
         try {
             while (true) {
-                List<Data> contentList = dataDAO.queueList(100);
+                int limit = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.limit"));
+
+                List<Data> contentList = dataDAO.queueList(limit);
 
                 for(Data data : contentList){
                     try {
@@ -40,10 +45,10 @@ public class ThreadAmazonUkDetail implements Runnable {
 
                         logger.debug(this.threadName + "## GET_END [URL=" + data.getLink() + "][TIME=" + end  + "]");
 
-                        if (content.getPrice() <= 0) {
-                            dataDAO.updateDataStatus(data.getId(), 2);
-                        } else {
+                        if (content.getPrice() > 0) {
                             dataDAO.updateData(content);
+                        } else {
+                            dataDAO.updateDataStatus(data.getId(), 2);
                         }
 
                         dataDAO.updateData(content);

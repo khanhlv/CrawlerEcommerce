@@ -10,7 +10,5 @@ public class StartThread {
             new Thread(new ThreadAmazonUk(i)).start();
             Thread.sleep(5000);
         }
-
-        new Thread(new ThreadAmazonUkDetail(1)).start();
     }
 }

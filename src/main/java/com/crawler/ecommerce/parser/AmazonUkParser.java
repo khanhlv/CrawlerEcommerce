@@ -1,8 +1,12 @@
 package com.crawler.ecommerce.parser;
 
-import com.crawler.ecommerce.core.UserAgent;
-import com.crawler.ecommerce.model.Data;
-import com.google.gson.Gson;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Connection;
@@ -12,10 +16,9 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.crawler.ecommerce.core.UserAgent;
+import com.crawler.ecommerce.model.Data;
+import com.google.gson.Gson;
 
 public class AmazonUkParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonUkParser.class);
@@ -130,6 +133,8 @@ public class AmazonUkParser {
                 .cookies(cookies)
                 .timeout(30000)
                 .get();
+
+        FileUtils.writeStringToFile(new File("data/" + code + ".html"), doc.html());
 
         String priceText = doc.select("span#priceblock_saleprice").text().trim();
 
