@@ -109,32 +109,27 @@ public class AmazonUkParser {
         return lisData;
     }
 
-    public Data readDetail(String url, String code, int id) throws Exception {
+    public Data readDetail(String url, String code, int id, String settingValue) throws Exception {
         Data dataMap = new Data();
 
-        String userAgent = UserAgent.getUserAgent();
+        Map<String, String> mapCookies = new Gson().fromJson(settingValue, Map.class);
 
-        // Cookie
-        Connection.Response response = Jsoup.connect("https://www.amazon.co.uk/cookieprefs?ref_=portal_banner_all")
-                .userAgent(userAgent)
-                .timeout(30000)
-                .header("X-Requested-With", "XMLHttpRequest")
-                .header("TE", "Trailers")
-                .header("origin", "https://www.amazon.co.uk")
-                .header("referer", "https://www.amazon.co.uk")
-                .ignoreContentType(true)
-                .method(Connection.Method.POST)
-                .execute();
-
-        Map<String, String> cookies = response.cookies();
+        String userAgent = mapCookies.get("userAgent");
 
         Document doc = Jsoup.connect(url)
                 .userAgent(userAgent)
-                .cookies(cookies)
+                .cookie("x-amz-captcha-2", mapCookies.get("x-amz-captcha-2"))
+                .cookie("x-amz-captcha-1", mapCookies.get("x-amz-captcha-1"))
                 .timeout(30000)
                 .get();
 
-        FileUtils.writeStringToFile(new File("data/" + code + ".html"), doc.html());
+        FileUtils.writeStringToFile(new File("data/html/" + code + ".html"), doc.html());
+
+        if (doc.select("form").attr("action").equals("/errors/validateCaptcha")) {
+            logger.debug("URL_DETAIL [{}] - VALIDATE_CAPTCHA", url);
+
+            return null;
+        }
 
         String priceText = doc.select("span#priceblock_saleprice").text().trim();
 
@@ -183,8 +178,6 @@ public class AmazonUkParser {
                     mapAttr.put("urlAttr", urlAttr);
 
                     listAttr.add(mapAttr);
-
-//                    System.out.println(textAttr + " - " + codeAttr + " - " + priceAttr + " - " + urlAttr);
                 });
 
                 mapData.put(key, listAttr);
@@ -316,8 +309,7 @@ public class AmazonUkParser {
             AmazonUkParser amazonParser = new AmazonUkParser();
 //            amazonParser.read("https://www.amazon.co.uk/s?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A560834%2Cn%3A376337011&page=" + 1);
 //            amazonParser.readQuery("https://www.amazon.co.uk/s/query?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A1345763031&page=32");
-            amazonParser.readDetail("https://www.amazon.co.uk/dp/B07SB3JC45", "B07SB3JC45", 1);
-
+            Data content = amazonParser.readDetail("https://www.amazon.co.uk/dp/B07ZG8W8B4", "B07ZG8W8B4", 1, "");
         } catch (Exception e) {
             e.printStackTrace();
         }
