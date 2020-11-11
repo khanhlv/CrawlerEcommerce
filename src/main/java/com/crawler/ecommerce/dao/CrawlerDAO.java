@@ -23,7 +23,7 @@ public class CrawlerDAO {
     public List<Crawler> crawlerList() throws SQLException {
 
         List<Crawler> crawlerList = new ArrayList<>();
-        String sqlStory = "SELECT * FROM crawler";
+        String sqlStory = "SELECT * FROM " + ResourceUtil.getValue("data.crawler");
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory);
              ResultSet resultSet = pStmt.executeQuery()) {
@@ -32,7 +32,6 @@ public class CrawlerDAO {
                 Crawler crawler = new Crawler();
                 crawler.setId(resultSet.getString("id"));
                 crawler.setName(resultSet.getString("name"));
-                crawler.setSite(resultSet.getString("site"));
                 crawler.setUrl(resultSet.getString("url"));
                 crawler.setPage(resultSet.getInt("page"));
                 crawlerList.add(crawler);
