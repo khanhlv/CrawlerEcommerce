@@ -1,4 +1,4 @@
-package com.crawler.ecommerce.thread;
+package com.crawler.ecommerce.thread.amazon.co.uk;
 
 
 import java.util.List;

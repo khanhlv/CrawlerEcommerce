@@ -19,94 +19,8 @@ import com.crawler.ecommerce.enums.Crawler;
 import com.crawler.ecommerce.model.Data;
 import com.google.gson.Gson;
 
-public class AmazonUkParser {
-    private static final Logger logger = LoggerFactory.getLogger(AmazonUkParser.class);
-
-    private List<Data> parserPageOne(Elements elements, String site) {
-
-        List<Data> lisData = new ArrayList<>();
-
-        if (elements.size() > 0) {
-            elements.stream().forEach(e -> {
-                String id = e.attr("data-asin");
-                String img = e.select("img.s-access-image").attr("src");
-                String text = e.select("h2.a-size-base.s-inline.s-access-title.a-text-normal").text();
-
-                Elements elePrice = e.select("a.a-link-normal.a-text-normal > span.a-size-base.a-color-price.s-price.a-text-bold");
-                String price = elePrice.text();
-
-                Elements eleRating = e.select("div.a-row.a-spacing-none > span[name=" + id +"]").select("span.a-icon-alt");
-                String rating = eleRating.text();
-
-                Elements eleComment = e.select("a[href*='customerReviews']");
-                String comment = eleComment.text();
-
-                lisData.add(toData(id, text, img, price, rating, comment, site));
-            });
-        }
-
-        return lisData;
-    }
-
-    private List<Data> parserPage(Elements elements, String site) {
-
-        List<Data> lisData = new ArrayList<>();
-
-        if (elements.size() > 0) {
-            elements.stream().forEach(e -> {
-                String id = e.attr("data-asin");
-                String img = e.select("img.s-image").attr("src");
-                String text = e.select("span.a-size-medium.a-color-base.a-text-normal").text();
-
-                Elements elePrice = e.select("span.a-price > span.a-offscreen");
-                String price;
-                if (elePrice.size() > 1) {
-                    price = elePrice.get(0).text();
-                } else {
-                    price = elePrice.text();
-                }
-
-                Elements eleRatingComment = e.select("div.a-row.a-size-small span[aria-label]");
-
-                String rating = StringUtils.EMPTY;
-                String comment = StringUtils.EMPTY;
-
-                if (eleRatingComment.size() > 0) {
-                    rating = eleRatingComment.get(0).attr("aria-label");
-                    comment = eleRatingComment.get(1).attr("aria-label");
-                }
-
-                lisData.add(toData(id, text, img, price, rating, comment, site));
-            });
-        }
-
-        return lisData;
-    }
-
-    public List<Data> read(String url) throws Exception {
-        List<Data> lisData;
-
-        logger.debug("URL [{}]", url);
-
-        Document doc = Jsoup.connect(url)
-                .userAgent(UserAgent.getUserAgent())
-                .timeout(30000)
-                .get();
-
-        Elements elementsMainResults = doc.select("div#mainResults > ul > li");
-
-        if (elementsMainResults.size() > 0) {
-            lisData = parserPageOne(elementsMainResults, url);
-        } else {
-            Elements elements = doc.select("div[data-component-type=\"s-search-result\"]");
-
-            lisData = parserPage(elements, url);
-        }
-
-        logger.debug("URL [{}] SIZE [{}]", url, lisData.size());
-
-        return lisData;
-    }
+public class AmazonComParser {
+    private static final Logger logger = LoggerFactory.getLogger(AmazonComParser.class);
 
     public Data readDetail(String url, String code, int id, String settingValue) throws Exception {
         Data dataMap = new Data();
@@ -146,7 +60,7 @@ public class AmazonUkParser {
 
         Elements propertiesElements = doc.select("div#twisterContainer ul");
 
-        String urlDetail = Crawler.AMAZON_CO_UK.getSite() + "/dp/%s/";
+        String urlDetail = Crawler.AMAZON_COM.getSite() + "/dp/%s/";
 
         if (propertiesElements.size() > 0) {
             Map<String, List<Map>> mapData = new LinkedHashMap<>();
@@ -214,14 +128,14 @@ public class AmazonUkParser {
     }
 
     private Data toData(String id, String text, String img, String price, String rating, String comment, String site) {
-        String urlDetail = Crawler.AMAZON_CO_UK.getSite() + "/dp/%s/";
+        String urlDetail = Crawler.AMAZON_COM.getSite() + "/dp/%s/";
 
         Data dataMap = new Data();
         dataMap.setCode(id);
         dataMap.setName(text);
         dataMap.setImage(img);
         dataMap.setPrice(NumberUtils.toDouble(
-                price.replaceAll("\\s+", "").replaceAll("\\£", "")));
+                price.replaceAll("\\s+", "").replaceAll("\\$", "")));
         dataMap.setRating(NumberUtils.toDouble(
                 rating.replaceAll(" out of 5 stars", "").replaceAll("\\s+", "")));
         dataMap.setComment_count(NumberUtils.toInt(comment.replaceAll(",", "")));
@@ -244,17 +158,12 @@ public class AmazonUkParser {
         List<Data> lisData = new ArrayList<>();
 
         Map<String, String> mapHeader = new LinkedHashMap<>();
-//        mapHeader.put("downlink", "2.75");
-//        mapHeader.put("ect", "4g");
-        mapHeader.put("origin", Crawler.AMAZON_CO_UK.getSite());
+        mapHeader.put("origin", Crawler.AMAZON_COM.getSite());
         mapHeader.put("referer", url);
-//        mapHeader.put("rtt", "100");
         mapHeader.put("sec-fetch-dest", "empty");
         mapHeader.put("sec-fetch-mode", "cors");
         mapHeader.put("x-amazon-s-fallback-url", "");
-//        mapHeader.put("x-amazon-rush-fingerprints", "AmazonRushAssetLoader:C19C2781A9CA71D093CC78D5B0E5D2EC34BBAA7B|AmazonRushFramework:7A9E1F79C14CA1CCB0640E2990FD1B4EF2FE4509|AmazonRushRouter:3CD20ED06C633A93E0B890D2CAF8E9C37C1E8C03|SearchAssets:FC9F7601DC4DAE1847E06565E0EB8A6AAC92A950|DynamicImageLoader:D3F0A3BA29C00086BD6D4686D2C79BBB78969B01|SearchPartnerAssets:D220327554E8509335FDCD0DC1BA7F441B605601");
         mapHeader.put("x-amazon-s-mismatch-behavior", "ALLOW");
-//        mapHeader.put("x-amazon-s-swrs-version", "15078BB72D30898381D55329B6223804");
         mapHeader.put("x-requested-with", "XMLHttpRequest");
 
         Connection.Response resp = Jsoup.connect(url)
@@ -283,7 +192,7 @@ public class AmazonUkParser {
                     String id = query.getAsin();
 
                     String img = doc.select("img").attr("src");
-                    String text = doc.select("span.a-color-base.a-text-normal").text();
+                    String text = doc.select("h2").text();
 
                     Elements elePrice = doc.select("span.a-price > span.a-offscreen");
 
@@ -308,10 +217,9 @@ public class AmazonUkParser {
 
     public static void main(String[] args) {
         try {
-            AmazonUkParser amazonParser = new AmazonUkParser();
-//            amazonParser.read("https://www.amazon.co.uk/s?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A560834%2Cn%3A376337011&page=" + 1);
-//            amazonParser.readQuery("https://www.amazon.co.uk/s/query?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A1345763031&page=32");
-            Data content = amazonParser.readDetail("https://www.amazon.co.uk/dp/B07ZG8W8B4", "B07ZG8W8B4", 1, "");
+            AmazonComParser amazonParser = new AmazonComParser();
+            amazonParser.readQuery("https://www.amazon.com/s/query?bbn=16225009011&rh=n%3A16225009011%2Cn%3A281407&page=2");
+//            Data content = amazonParser.readDetail("https://www.amazon.co.uk/dp/B07ZG8W8B4", "B07ZG8W8B4", 1, "");
         } catch (Exception e) {
             e.printStackTrace();
         }

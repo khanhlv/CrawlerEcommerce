@@ -1,13 +1,5 @@
 package com.crawler.ecommerce.dao;
 
-import com.crawler.ecommerce.core.ConnectionPool;
-import com.crawler.ecommerce.model.Crawler;
-import com.crawler.ecommerce.model.Queue;
-import com.crawler.ecommerce.util.ResourceUtil;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,6 +8,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.crawler.ecommerce.core.ConnectionPool;
+import com.crawler.ecommerce.core.ShareApplication;
+import com.crawler.ecommerce.model.Crawler;
+import com.crawler.ecommerce.model.Queue;
+
 public class CrawlerDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlerDAO.class);
@@ -23,7 +24,7 @@ public class CrawlerDAO {
     public List<Crawler> crawlerList() throws SQLException {
 
         List<Crawler> crawlerList = new ArrayList<>();
-        String sqlStory = "SELECT * FROM " + ResourceUtil.getValue("data.crawler");
+        String sqlStory = "SELECT * FROM " + ShareApplication.crawler.getTableCrawler();
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory);
              ResultSet resultSet = pStmt.executeQuery()) {
@@ -47,7 +48,7 @@ public class CrawlerDAO {
     public List<Queue> queueList(int limit) throws SQLException {
 
         List<Queue> queueList = new ArrayList<>();
-        String sqlStory = "SELECT * FROM " + ResourceUtil.getValue("data.crawler.queue") + " WHERE status = 0 LIMIT ?";
+        String sqlStory = "SELECT * FROM " + ShareApplication.crawler.getTableQueue() + " WHERE status = 0 LIMIT ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -75,7 +76,7 @@ public class CrawlerDAO {
     }
 
     public void updateQueueStatus(int id, int status) throws SQLException {
-        String sqlStory = "UPDATE " + ResourceUtil.getValue("data.crawler.queue") + " SET status = ? WHERE id = ?";
+        String sqlStory = "UPDATE " + ShareApplication.crawler.getTableQueue() + " SET status = ? WHERE id = ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -96,7 +97,7 @@ public class CrawlerDAO {
                     String url = v.getUrl().replaceAll("#\\{page\\}", i + "");
                     System.out.println(url);
 
-                    data.append(String.format("INSERT INTO %s (link, name, status) VALUES ('%s','%s',0);\n", ResourceUtil.getValue("data.crawler.queue"), url, v.getName()));
+                    data.append(String.format("INSERT INTO %s (link, name, status) VALUES ('%s','%s',0);\n", ShareApplication.crawler.getTableQueue(), url, v.getName()));
                 }
             });
 

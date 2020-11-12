@@ -1,9 +1,5 @@
 package com.crawler.ecommerce.dao;
 
-import com.crawler.ecommerce.core.ConnectionPool;
-import com.crawler.ecommerce.model.Data;
-import com.crawler.ecommerce.util.ResourceUtil;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,12 +7,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.crawler.ecommerce.core.ConnectionPool;
+import com.crawler.ecommerce.core.ShareApplication;
+import com.crawler.ecommerce.model.Data;
+
 public class DataDAO {
 
     public List<Data> queueList(int limit) throws SQLException {
 
         List<Data> dataList = new ArrayList<>();
-        String sqlStory = "SELECT * FROM " + ResourceUtil.getValue("data.crawler.table") + " WHERE status = 0 LIMIT ?";
+        String sqlStory = "SELECT * FROM " + ShareApplication.crawler.getTableData() + " WHERE status = 0 LIMIT ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -54,7 +54,8 @@ public class DataDAO {
     }
 
     public void updateData(Data data) throws SQLException {
-        String sqlStory = "UPDATE " + ResourceUtil.getValue("data.crawler.table") + " SET price = ?, properties = ?, description = ?, shop = ?, rating = ?, comment_count = ?, status = 1, updated_date = now() WHERE id = ?";
+        String sqlStory = "UPDATE " + ShareApplication.crawler.getTableData() + " SET price = ?, properties = ?, description = ?, shop = ?, rating = ?, comment_count = ?, status = 1, " +
+                "updated_date = now() WHERE id = ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -74,7 +75,7 @@ public class DataDAO {
     }
 
     public void updateDataStatus(int id, int status) throws SQLException {
-        String sqlStory = "UPDATE " + ResourceUtil.getValue("data.crawler.table") + " SET status = ? WHERE id = ?";
+        String sqlStory = "UPDATE " + ShareApplication.crawler.getTableData() + " SET status = ? WHERE id = ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -88,7 +89,7 @@ public class DataDAO {
     }
 
     public boolean hasExistsCode(String code) throws SQLException {
-        String sqlStory = "SELECT code FROM " + ResourceUtil.getValue("data.crawler.table") + " WHERE code = ?";
+        String sqlStory = "SELECT code FROM " + ShareApplication.crawler.getTableData() + " WHERE code = ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -107,7 +108,7 @@ public class DataDAO {
     public void insert(Data data) throws SQLException {
 
         if (!hasExistsCode(data.getCode())) {
-            String sqlStory = "INSERT INTO " + ResourceUtil.getValue("data.crawler.table") + "(code, name, image, link, price, rating, comment_count, site, category, status) " +
+            String sqlStory = "INSERT INTO " + ShareApplication.crawler.getTableData() + "(code, name, image, link, price, rating, comment_count, site, category, status) " +
                     "VALUES (?,?,?,?,?,?,?,?,?,0)";
             try (Connection con = ConnectionPool.getTransactional();
                  PreparedStatement pStmt = con.prepareStatement(sqlStory)) {

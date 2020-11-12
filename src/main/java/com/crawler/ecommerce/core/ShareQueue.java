@@ -1,15 +1,18 @@
 package com.crawler.ecommerce.core;
 
-import com.crawler.ecommerce.model.Queue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import org.apache.commons.lang3.math.NumberUtils;
+
+import com.crawler.ecommerce.model.Queue;
+import com.crawler.ecommerce.util.ResourceUtil;
+
 public final class ShareQueue {
     public static ConcurrentLinkedDeque<String> shareQueue = new ConcurrentLinkedDeque<>();
-    public final static int QUEUE_SIZE = 5;
-    public final static int QUEUE_SIZE_LIMIT = 50;
+    public final static int QUEUE_SIZE = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.queue.size"));
+    public final static int QUEUE_SIZE_LIMIT = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.queue.limit"));
 
     public static void addItem(List<Queue> queueList) {
         if (shareQueue.size() < QUEUE_SIZE_LIMIT) {

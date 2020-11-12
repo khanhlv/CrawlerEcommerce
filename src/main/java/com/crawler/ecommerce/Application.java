@@ -1,23 +1,24 @@
 package com.crawler.ecommerce;
 
+import com.crawler.ecommerce.core.ShareApplication;
+import com.crawler.ecommerce.enums.Crawler;
+import com.crawler.ecommerce.enums.ThreadMod;
 import com.crawler.ecommerce.thread.StartThread;
-import com.crawler.ecommerce.thread.ThreadAmazonUkDetail;
 
 public class Application {
+
+
     public static void main(String[] args) throws Exception {
+        System.out.println("Crawler: AMAZON_CO_UK, AMAZON_COM");
+        System.out.println("ThreadMod:  ALL, SINGLE_DETAIL, SINGLE_CATEGORY");
 
-        if (args != null && args[0].equals("1")) {
-            new Thread(new ThreadAmazonUkDetail(1)).start();
-        }
+        if (args != null && args.length == 2) {
+            String crawler = args[0];
+            String threadMod = args[1];
 
-        if (args != null && args[0].equals("2")) {
-            new StartThread().execute(4);
-        }
+            ShareApplication.crawler = Crawler.valueOf(crawler);
 
-        if (args != null && args[0].equals("3")) {
-            new StartThread().execute(4);
-
-            new Thread(new ThreadAmazonUkDetail(1)).start();
+            new StartThread().execute(4, Crawler.valueOf(crawler), ThreadMod.valueOf(threadMod));
         }
     }
 }

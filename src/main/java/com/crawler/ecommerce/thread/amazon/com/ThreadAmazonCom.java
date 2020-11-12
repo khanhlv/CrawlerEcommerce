@@ -1,28 +1,30 @@
-package com.crawler.ecommerce.thread;
+package com.crawler.ecommerce.thread.amazon.com;
 
 
-import com.crawler.ecommerce.core.ShareQueue;
-import com.crawler.ecommerce.dao.DataDAO;
-import com.crawler.ecommerce.dao.CrawlerDAO;
-import com.crawler.ecommerce.model.Data;
-import com.crawler.ecommerce.parser.AmazonUkParser;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import com.crawler.ecommerce.core.ShareQueue;
+import com.crawler.ecommerce.dao.CrawlerDAO;
+import com.crawler.ecommerce.dao.DataDAO;
+import com.crawler.ecommerce.enums.Crawler;
+import com.crawler.ecommerce.model.Data;
+import com.crawler.ecommerce.parser.AmazonComParser;
 
-public class ThreadAmazonUk implements Runnable {
+public class ThreadAmazonCom implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(ThreadAmazonUk.class);
-    private AmazonUkParser amazonParser = new AmazonUkParser();
+    private static final Logger logger = LoggerFactory.getLogger(ThreadAmazonCom.class);
+    private AmazonComParser amazonParser = new AmazonComParser();
     private DataDAO dataDAO = new DataDAO();
     private CrawlerDAO crawlerDAO = new CrawlerDAO();
 
     private String threadName = "THREAD_";
 
-    public ThreadAmazonUk(int threadCount) {
+    public ThreadAmazonCom(int threadCount) {
         this.threadName = this.threadName + threadCount;
         System.out.println("START_THREAD_" + threadCount);
     }
@@ -44,7 +46,7 @@ public class ThreadAmazonUk implements Runnable {
 
                         logger.debug(this.threadName + " ## GET_START [URL=" + link + "]");
 
-                        link = link.replaceAll("https://www\\.amazon\\.co\\.uk/s", "https://www.amazon.co.uk/s/query");
+                        link = link.replaceAll(Crawler.AMAZON_COM.getSite() + "/s", "https://www.amazon.com/s/query");
 
                         List<Data> listData = amazonParser.readQuery(link);
 
@@ -68,7 +70,7 @@ public class ThreadAmazonUk implements Runnable {
                 Thread.sleep( 5000);
             }
         } catch (Exception ex) {
-            logger.error(this.threadName + " ## ERROR[ThreadAmazonUK]", ex);
+            logger.error(this.threadName + " ## ERROR[ThreadAmazonCom]", ex);
         }
     }
 }
