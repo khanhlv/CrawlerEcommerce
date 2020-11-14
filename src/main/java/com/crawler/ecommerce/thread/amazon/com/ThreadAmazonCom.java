@@ -1,19 +1,18 @@
 package com.crawler.ecommerce.thread.amazon.com;
 
 
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.crawler.ecommerce.core.ShareQueue;
 import com.crawler.ecommerce.dao.CrawlerDAO;
 import com.crawler.ecommerce.dao.DataDAO;
 import com.crawler.ecommerce.enums.Crawler;
 import com.crawler.ecommerce.model.Data;
 import com.crawler.ecommerce.parser.AmazonComParser;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class ThreadAmazonCom implements Runnable {
 
@@ -64,10 +63,10 @@ public class ThreadAmazonCom implements Runnable {
                         logger.error(this.threadName + " ## ERROR[" + link + "]", ex);
                         crawlerDAO.updateQueueStatus(id, -1);
                     }
-                    Thread.sleep( 500);
+                    Thread.sleep( 100);
                 }
 
-                Thread.sleep( 5000);
+                Thread.sleep( 1000);
             }
         } catch (Exception ex) {
             logger.error(this.threadName + " ## ERROR[ThreadAmazonCom]", ex);

@@ -1,13 +1,15 @@
 package com.crawler.ecommerce.core;
 
+import com.crawler.ecommerce.model.Queue;
+import com.crawler.ecommerce.util.ResourceUtil;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
-
-import org.apache.commons.lang3.math.NumberUtils;
-
-import com.crawler.ecommerce.model.Queue;
-import com.crawler.ecommerce.util.ResourceUtil;
 
 public final class ShareQueue {
     public static ConcurrentLinkedDeque<String> shareQueue = new ConcurrentLinkedDeque<>();
@@ -25,7 +27,7 @@ public final class ShareQueue {
         }
     }
 
-    public static List<String> getItem() {
+    public static List<String> getItem() throws IOException {
         List<String> listItem = new ArrayList<>();
 
         int size = shareQueue.size() > QUEUE_SIZE ? QUEUE_SIZE : shareQueue.size();
@@ -33,6 +35,8 @@ public final class ShareQueue {
         for (int i = 0; i < size; i++) {
             listItem.add(shareQueue.poll());
         }
+
+        FileUtils.writeLines(new File("data/queue.txt"), "UTF-8", ShareQueue.shareQueue);
 
         return listItem;
     }

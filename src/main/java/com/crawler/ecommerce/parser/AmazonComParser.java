@@ -1,10 +1,9 @@
 package com.crawler.ecommerce.parser;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.crawler.ecommerce.core.UserAgent;
+import com.crawler.ecommerce.enums.Crawler;
+import com.crawler.ecommerce.model.Data;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Connection;
@@ -14,10 +13,10 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.crawler.ecommerce.core.UserAgent;
-import com.crawler.ecommerce.enums.Crawler;
-import com.crawler.ecommerce.model.Data;
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AmazonComParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonComParser.class);
@@ -50,7 +49,7 @@ public class AmazonComParser {
             priceText = doc.select("span#priceblock_ourprice").text().trim();
         }
 
-        double price = NumberUtils.toDouble(priceText.replaceAll("\\s+", "").replaceAll("\\£", ""));
+        double price = NumberUtils.toDouble(priceText.replaceAll("\\s+", "").replaceAll("\\$", ""));
         String description = doc.select("div#feature-bullets").text();
 
         String shop = doc.select("a#sellerProfileTriggerId").text().trim();
@@ -217,9 +216,14 @@ public class AmazonComParser {
 
     public static void main(String[] args) {
         try {
+            String setting = "{\n" +
+                    "  \"userAgent\" : \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36\",\n" +
+                    "  \"x-amz-captcha-2\" : \"PEce+/DomX9LQnj3wgdtWQ==\",\n" +
+                    "  \"x-amz-captcha-1\" : \"1605337900184777\"\n" +
+                    "}";
             AmazonComParser amazonParser = new AmazonComParser();
-            amazonParser.readQuery("https://www.amazon.com/s/query?bbn=16225009011&rh=n%3A16225009011%2Cn%3A281407&page=2");
-//            Data content = amazonParser.readDetail("https://www.amazon.co.uk/dp/B07ZG8W8B4", "B07ZG8W8B4", 1, "");
+//            amazonParser.readQuery("https://www.amazon.com/s/query?bbn=16225009011&rh=n%3A16225009011%2Cn%3A281407&page=2");
+            Data content = amazonParser.readDetail("https://www.amazon.com/dp/B07D2HB486/", "B07D2HB486", 1, setting);
         } catch (Exception e) {
             e.printStackTrace();
         }
