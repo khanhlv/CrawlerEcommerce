@@ -4,6 +4,7 @@ import com.crawler.ecommerce.core.UserAgent;
 import com.crawler.ecommerce.enums.Crawler;
 import com.crawler.ecommerce.model.Data;
 import com.google.gson.Gson;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Connection;
@@ -13,6 +14,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,7 +37,7 @@ public class AmazonComParser {
                 .timeout(30000)
                 .get();
 
-//        FileUtils.writeStringToFile(new File("data/html/" + code + ".html"), doc.html());
+        FileUtils.writeStringToFile(new File("data/html/" + code + ".html"), doc.html());
 
         if (doc.select("form").attr("action").equals("/errors/validateCaptcha")) {
             logger.debug("URL_DETAIL [{}] - VALIDATE_CAPTCHA", url);
@@ -49,20 +51,56 @@ public class AmazonComParser {
             priceText = doc.select("span#priceblock_ourprice").text().trim();
         }
 
+        priceText = StringUtils.split(priceText, "-")[0];
+
         double price = NumberUtils.toDouble(priceText.replaceAll("\\s+", "").replaceAll("\\$", ""));
         String description = doc.select("div#feature-bullets").text();
 
         String shop = doc.select("a#sellerProfileTriggerId").text().trim();
         double rating = NumberUtils.toDouble(doc.select("span#acrPopover").attr("title").trim()
                 .replaceAll(" out of 5 stars", "").replaceAll("\\s+", ""));
-        int count_comment = NumberUtils.toInt(doc.select("span#acrCustomerReviewText").text().trim().replaceAll("[^0-9]+", ""));
+        int count_comment = NumberUtils.toInt(doc.select("span#acrCustomerReviewText").get(0).text().trim().replaceAll("[^0-9]+", ""));
 
         Elements propertiesElements = doc.select("div#twisterContainer ul");
 
+        Elements propertiesElementsSize = doc.select("div#twisterContainer select");
+
         String urlDetail = Crawler.AMAZON_COM.getSite() + "/dp/%s/";
 
+        Map<String, List<Map>> mapData = new LinkedHashMap<>();
+
+        if (propertiesElementsSize.size() > 0) {
+
+            propertiesElementsSize.forEach(els -> {
+
+                String key = els.attr("data-a-touch-header").toLowerCase();
+
+                Elements elementsOption = els.select(".dropdownAvailable");
+
+                List<Map> listAttr = new ArrayList<>();
+
+                elementsOption.forEach(dataEle -> {
+                    Map<String, String> mapAttr = new LinkedHashMap<>();
+
+                    String textAttr = dataEle.attr("data-a-html-content").trim();
+
+                    String codeAttr = StringUtils.split(dataEle.attr("value").trim() , ",")[1];
+                    String urlAttr = String.format(urlDetail, codeAttr);
+
+                    mapAttr.put("text", textAttr);
+                    mapAttr.put("price", "");
+                    mapAttr.put("code", codeAttr);
+                    mapAttr.put("urlAttr", urlAttr);
+
+                    listAttr.add(mapAttr);
+                });
+
+                mapData.put(key, listAttr);
+
+            });
+        }
+
         if (propertiesElements.size() > 0) {
-            Map<String, List<Map>> mapData = new LinkedHashMap<>();
             propertiesElements.forEach(els -> {
                 String key = els.attr("data-a-button-group")
                         .replaceAll("\\{\"name\":\"twister_", "")
@@ -94,6 +132,9 @@ public class AmazonComParser {
 
                 mapData.put(key, listAttr);
             });
+        }
+
+        if (mapData.size() > 0) {
             dataMap.setProperties(new Gson().toJson(mapData));
         } else {
             dataMap.setProperties("");
@@ -111,14 +152,14 @@ public class AmazonComParser {
 
         dataMap.setDescription(emotionless);
 
-//        System.out.println("--------------------");
-//        System.out.println(dataMap.getCode());
-//        System.out.println(dataMap.getPrice());
-//        System.out.println(dataMap.getRating());
-//        System.out.println(dataMap.getComment_count());
-//        System.out.println(dataMap.getShop());
-//        System.out.println(dataMap.getDescription());
-//        System.out.println(dataMap.getProperties());
+        System.out.println("--------------------");
+        System.out.println(dataMap.getCode());
+        System.out.println(dataMap.getPrice());
+        System.out.println(dataMap.getRating());
+        System.out.println(dataMap.getComment_count());
+        System.out.println(dataMap.getShop());
+        System.out.println(dataMap.getDescription());
+        System.out.println(dataMap.getProperties());
 
         logger.debug("URL_DETAIL [{}] PRICE[{}] RATE[{} - {}] SHOP[{}] PROPERTIES[{}]", url, dataMap.getPrice(), dataMap.getRating(),
                 dataMap.getComment_count(), dataMap.getShop(), StringUtils.isNotBlank(dataMap.getProperties()));
@@ -223,7 +264,7 @@ public class AmazonComParser {
                     "}";
             AmazonComParser amazonParser = new AmazonComParser();
 //            amazonParser.readQuery("https://www.amazon.com/s/query?bbn=16225009011&rh=n%3A16225009011%2Cn%3A281407&page=2");
-            Data content = amazonParser.readDetail("https://www.amazon.com/dp/B07D2HB486/", "B07D2HB486", 1, setting);
+            Data content = amazonParser.readDetail("https://www.amazon.com/dp/B077ZMKWVM/", "B077ZMKWVM", 1, setting);
         } catch (Exception e) {
             e.printStackTrace();
         }

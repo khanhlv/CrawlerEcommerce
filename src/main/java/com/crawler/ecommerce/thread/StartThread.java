@@ -6,6 +6,7 @@ import com.crawler.ecommerce.enums.ThreadMod;
 import com.crawler.ecommerce.thread.amazon.co.uk.ThreadAmazonUk;
 import com.crawler.ecommerce.thread.amazon.co.uk.ThreadAmazonUkDetail;
 import com.crawler.ecommerce.thread.amazon.com.ThreadAmazonCom;
+import com.crawler.ecommerce.thread.amazon.com.ThreadAmazonComDetail;
 
 public class StartThread {
     public void execute(int threadCount, Crawler crawler, ThreadMod threadMod) throws Exception {
@@ -50,6 +51,7 @@ public class StartThread {
                     }
                     break;
                 case SINGLE_DETAIL:
+                    new Thread(new ThreadAmazonComDetail(1)).start();
                     break;
                 case SINGLE_CATEGORY:
                     new Thread(new ThreadShareQueue()).start();

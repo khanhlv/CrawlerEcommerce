@@ -1,10 +1,9 @@
 package com.crawler.ecommerce.parser;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.crawler.ecommerce.core.UserAgent;
+import com.crawler.ecommerce.enums.Crawler;
+import com.crawler.ecommerce.model.Data;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Connection;
@@ -14,10 +13,10 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.crawler.ecommerce.core.UserAgent;
-import com.crawler.ecommerce.enums.Crawler;
-import com.crawler.ecommerce.model.Data;
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AmazonUkParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonUkParser.class);
@@ -136,6 +135,8 @@ public class AmazonUkParser {
             priceText = doc.select("span#priceblock_ourprice").text().trim();
         }
 
+        priceText = StringUtils.split(priceText, "-")[0];
+
         double price = NumberUtils.toDouble(priceText.replaceAll("\\s+", "").replaceAll("\\£", ""));
         String description = doc.select("div#feature-bullets").text();
 
@@ -145,11 +146,44 @@ public class AmazonUkParser {
         int count_comment = NumberUtils.toInt(doc.select("span#acrCustomerReviewText").text().trim().replaceAll("[^0-9]+", ""));
 
         Elements propertiesElements = doc.select("div#twisterContainer ul");
+        Elements propertiesElementsSize = doc.select("div#twisterContainer select");
 
         String urlDetail = Crawler.AMAZON_CO_UK.getSite() + "/dp/%s/";
 
+        Map<String, List<Map>> mapData = new LinkedHashMap<>();
+
+        if (propertiesElementsSize.size() > 0) {
+
+            propertiesElementsSize.forEach(els -> {
+
+                String key = els.attr("data-a-touch-header").toLowerCase();
+
+                Elements elementsOption = els.select(".dropdownAvailable");
+
+                List<Map> listAttr = new ArrayList<>();
+
+                elementsOption.forEach(dataEle -> {
+                    Map<String, String> mapAttr = new LinkedHashMap<>();
+
+                    String textAttr = dataEle.attr("data-a-html-content").trim();
+
+                    String codeAttr = StringUtils.split(dataEle.attr("value").trim() , ",")[1];
+                    String urlAttr = String.format(urlDetail, codeAttr);
+
+                    mapAttr.put("text", textAttr);
+                    mapAttr.put("price", "");
+                    mapAttr.put("code", codeAttr);
+                    mapAttr.put("urlAttr", urlAttr);
+
+                    listAttr.add(mapAttr);
+                });
+
+                mapData.put(key, listAttr);
+
+            });
+        }
+
         if (propertiesElements.size() > 0) {
-            Map<String, List<Map>> mapData = new LinkedHashMap<>();
             propertiesElements.forEach(els -> {
                 String key = els.attr("data-a-button-group")
                         .replaceAll("\\{\"name\":\"twister_", "")
@@ -181,6 +215,10 @@ public class AmazonUkParser {
 
                 mapData.put(key, listAttr);
             });
+            dataMap.setProperties(new Gson().toJson(mapData));
+        }
+
+        if (mapData.size() > 0) {
             dataMap.setProperties(new Gson().toJson(mapData));
         } else {
             dataMap.setProperties("");
