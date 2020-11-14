@@ -1,15 +1,15 @@
 package com.crawler.ecommerce.dao;
 
+import com.crawler.ecommerce.core.ConnectionPool;
+import com.crawler.ecommerce.core.ShareApplication;
+import com.crawler.ecommerce.model.Data;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.crawler.ecommerce.core.ConnectionPool;
-import com.crawler.ecommerce.core.ShareApplication;
-import com.crawler.ecommerce.model.Data;
 
 public class DataDAO {
 
@@ -53,8 +53,8 @@ public class DataDAO {
         return dataList;
     }
 
-    public void updateData(Data data) throws SQLException {
-        String sqlStory = "UPDATE " + ShareApplication.crawler.getTableData() + " SET price = ?, properties = ?, description = ?, shop = ?, rating = ?, comment_count = ?, status = 1, " +
+    public void updateData(Data data, int status) throws SQLException {
+        String sqlStory = "UPDATE " + ShareApplication.crawler.getTableData() + " SET price = ?, properties = ?, description = ?, shop = ?, rating = ?, comment_count = ?, status = ?, " +
                 "updated_date = now() WHERE id = ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
@@ -65,8 +65,9 @@ public class DataDAO {
             pStmt.setString(4, data.getShop());
             pStmt.setDouble(5, data.getRating());
             pStmt.setInt(6, data.getComment_count());
+            pStmt.setInt(7, status);
+            pStmt.setInt(8, data.getId());
 
-            pStmt.setInt(7, data.getId());
 
             pStmt.executeUpdate();
         } catch (Exception ex) {
