@@ -63,7 +63,7 @@ public class ThreadAmazonCom implements Runnable {
                         logger.error(this.threadName + " ## ERROR[" + link + "]", ex);
                         crawlerDAO.updateQueueStatus(id, -1);
                     }
-                    Thread.sleep( 100);
+                    Thread.sleep( 500);
                 }
 
                 Thread.sleep( 1000);
