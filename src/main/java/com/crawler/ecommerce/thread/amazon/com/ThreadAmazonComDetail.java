@@ -1,17 +1,18 @@
 package com.crawler.ecommerce.thread.amazon.com;
 
 
+import java.util.List;
+
+import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.crawler.ecommerce.dao.DataDAO;
 import com.crawler.ecommerce.dao.SettingDAO;
 import com.crawler.ecommerce.enums.Crawler;
 import com.crawler.ecommerce.model.Data;
 import com.crawler.ecommerce.parser.AmazonComParser;
 import com.crawler.ecommerce.util.ResourceUtil;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public class ThreadAmazonComDetail implements Runnable {
 
@@ -63,7 +64,7 @@ public class ThreadAmazonComDetail implements Runnable {
                                 } else {
                                     content.setPrice(data.getPrice());
 
-                                    dataDAO.updateData(content, 2);
+                                    dataDAO.updateData(content, 1);
                                 }
                             }
 

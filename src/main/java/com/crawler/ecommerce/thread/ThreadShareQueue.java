@@ -1,14 +1,15 @@
 package com.crawler.ecommerce.thread;
 
-import com.crawler.ecommerce.core.ShareQueue;
-import com.crawler.ecommerce.dao.CrawlerDAO;
-import com.crawler.ecommerce.model.Queue;
+import java.io.File;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.List;
+import com.crawler.ecommerce.core.ShareQueue;
+import com.crawler.ecommerce.dao.CrawlerDAO;
+import com.crawler.ecommerce.model.Queue;
 
 public class ThreadShareQueue implements Runnable {
 
@@ -46,7 +47,7 @@ public class ThreadShareQueue implements Runnable {
 
                 System.out.println("SHARE_QUEUE=" + ShareQueue.shareQueue.size());
 
-                Thread.sleep(1 * 60 * 1000);
+                Thread.sleep(2 * 60 * 1000);
             }
         } catch (Exception ex) {
             logger.error("ERROR[ThreadShareQueue]", ex);

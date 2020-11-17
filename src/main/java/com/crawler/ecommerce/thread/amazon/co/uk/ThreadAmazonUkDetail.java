@@ -1,16 +1,18 @@
 package com.crawler.ecommerce.thread.amazon.co.uk;
 
 
-import com.crawler.ecommerce.dao.DataDAO;
-import com.crawler.ecommerce.dao.SettingDAO;
-import com.crawler.ecommerce.model.Data;
-import com.crawler.ecommerce.parser.AmazonUkParser;
-import com.crawler.ecommerce.util.ResourceUtil;
+import java.util.List;
+
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import com.crawler.ecommerce.dao.DataDAO;
+import com.crawler.ecommerce.dao.SettingDAO;
+import com.crawler.ecommerce.enums.Crawler;
+import com.crawler.ecommerce.model.Data;
+import com.crawler.ecommerce.parser.AmazonUkParser;
+import com.crawler.ecommerce.util.ResourceUtil;
 
 public class ThreadAmazonUkDetail implements Runnable {
 
@@ -32,7 +34,7 @@ public class ThreadAmazonUkDetail implements Runnable {
             while (true) {
                 int limit = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.limit"));
 
-                String settingValue = settingDAO.getValue("AMAZON_CO_UK_DETAIL");
+                String settingValue = settingDAO.getValue(Crawler.AMAZON_CO_UK.name());
 
                 if (settingValue != null) {
 
@@ -62,7 +64,7 @@ public class ThreadAmazonUkDetail implements Runnable {
                                 } else {
                                     content.setPrice(data.getPrice());
 
-                                    dataDAO.updateData(content, 2);
+                                    dataDAO.updateData(content, 1);
                                 }
                             }
 

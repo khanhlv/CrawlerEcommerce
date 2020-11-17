@@ -12,7 +12,7 @@ public class SettingDAO {
     public String getValue(String key) throws SQLException {
         String result = null;
 
-        String sqlStory = "SELECT * FROM setting where setting_key = ? and status = 1";
+        String sqlStory = "SELECT * FROM `setting` where `setting_key` = ? and `status` = 1";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -33,7 +33,7 @@ public class SettingDAO {
     }
 
     public void updateStatus(String key, int status) throws SQLException {
-        String sqlStory = "UPDATE setting SET status = ? WHERE setting_key = ?";
+        String sqlStory = "UPDATE `setting` SET `status` = ? WHERE `setting_key` = ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
