@@ -15,10 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AmazonComParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonComParser.class);
@@ -61,78 +58,9 @@ public class AmazonComParser {
                 .replaceAll(" out of 5 stars", "").replaceAll("\\s+", ""));
         int count_comment = NumberUtils.toInt(doc.select("span#acrCustomerReviewText").get(0).text().trim().replaceAll("[^0-9]+", ""));
 
-        Elements propertiesElements = doc.select("div#twisterContainer ul");
+        String propertiesElements = doc.select("script").toString();
 
-        Elements propertiesElementsSize = doc.select("div#twisterContainer select");
-
-        String urlDetail = Crawler.AMAZON_COM.getSite() + "/dp/%s/";
-
-        Map<String, List<Map>> mapData = new LinkedHashMap<>();
-
-        if (propertiesElementsSize.size() > 0) {
-
-            propertiesElementsSize.forEach(els -> {
-
-                String key = els.attr("data-a-touch-header").toLowerCase();
-
-                Elements elementsOption = els.select(".dropdownAvailable");
-
-                List<Map> listAttr = new ArrayList<>();
-
-                elementsOption.forEach(dataEle -> {
-                    Map<String, String> mapAttr = new LinkedHashMap<>();
-
-                    String textAttr = dataEle.attr("data-a-html-content").trim();
-
-                    String codeAttr = StringUtils.split(dataEle.attr("value").trim() , ",")[1];
-                    String urlAttr = String.format(urlDetail, codeAttr);
-
-                    mapAttr.put("text", textAttr);
-                    mapAttr.put("price", "");
-                    mapAttr.put("code", codeAttr);
-                    mapAttr.put("urlAttr", urlAttr);
-
-                    listAttr.add(mapAttr);
-                });
-
-                mapData.put(key, listAttr);
-
-            });
-        }
-
-        if (propertiesElements.size() > 0) {
-            propertiesElements.forEach(els -> {
-                String key = els.attr("data-a-button-group")
-                        .replaceAll("\\{\"name\":\"twister_", "")
-                        .replaceAll("\"}", "");
-
-                Elements elementsLi = els.select("li");
-
-                List<Map> listAttr = new ArrayList<>();
-                elementsLi.forEach(dataEle -> {
-                    Map<String, String> mapAttr = new LinkedHashMap<>();
-                    String textAttr = dataEle.select("img.imgSwatch").attr("alt").trim();
-
-                    if (StringUtils.isBlank(textAttr)) {
-                        textAttr = dataEle.select("button div.twisterTextDiv").text().trim();
-                    }
-
-                    String priceAttr = dataEle.select("button span.twisterSwatchPrice").text().trim();
-
-                    String codeAttr = dataEle.attr("data-defaultasin").trim();
-                    String urlAttr = String.format(urlDetail, codeAttr);
-
-                    mapAttr.put("text", textAttr);
-                    mapAttr.put("price", priceAttr);
-                    mapAttr.put("code", codeAttr);
-                    mapAttr.put("urlAttr", urlAttr);
-
-                    listAttr.add(mapAttr);
-                });
-
-                mapData.put(key, listAttr);
-            });
-        }
+        Map<String, Object> mapData = properties(propertiesElements);
 
         if (mapData.size() > 0) {
             dataMap.setProperties(new Gson().toJson(mapData));
@@ -152,19 +80,61 @@ public class AmazonComParser {
 
         dataMap.setDescription(emotionless);
 
-        System.out.println("--------------------");
-        System.out.println(dataMap.getCode());
-        System.out.println(dataMap.getPrice());
-        System.out.println(dataMap.getRating());
-        System.out.println(dataMap.getComment_count());
-        System.out.println(dataMap.getShop());
-        System.out.println(dataMap.getDescription());
-        System.out.println(dataMap.getProperties());
+//        System.out.println("--------------------");
+//        System.out.println(dataMap.getCode());
+//        System.out.println(dataMap.getPrice());
+//        System.out.println(dataMap.getRating());
+//        System.out.println(dataMap.getComment_count());
+//        System.out.println(dataMap.getShop());
+//        System.out.println(dataMap.getDescription());
+//        System.out.println(dataMap.getProperties());
 
         logger.debug("URL_DETAIL [{}] PRICE[{}] RATE[{} - {}] SHOP[{}] PROPERTIES[{}]", url, dataMap.getPrice(), dataMap.getRating(),
                 dataMap.getComment_count(), dataMap.getShop(), StringUtils.isNotBlank(dataMap.getProperties()));
 
         return dataMap;
+    }
+
+    private Map<String, Object> properties(String dataInput) {
+        String dataAttribute = dataInput.substring(dataInput.indexOf("P.register('twister-js-init-dpx-data'"),
+                dataInput.indexOf("useDesktopTwisterMetaAsset"));
+        dataAttribute = dataAttribute.substring(dataAttribute.indexOf("var dataToReturn = ") + 19, dataAttribute.indexOf("return dataToReturn;") - 2);
+        dataAttribute = dataAttribute.replaceFirst("num_total_variations", UUID.randomUUID().toString());
+
+
+        String dataParseJSON = dataInput.substring(dataInput.indexOf("var obj = jQuery.parseJSON('") + 28, dataInput.indexOf("data" +
+                "[\"alwaysIncludeVideo\"]") - 4);
+
+        Map<String, Object> mapDataParseJSON = new Gson().fromJson(dataParseJSON, Map.class);
+
+        Map<String, Object> mapDataAttribute = new Gson().fromJson(dataAttribute, Map.class);
+
+        Map<String, Object> colorImages =  (Map<String, Object>) mapDataParseJSON.get("colorImages");
+
+        List<String> dimensionValues =  (List<String>) mapDataAttribute.get("dimensions");
+        Map<String, List<String>> dimensionValuesDisplayData =  (Map<String, List<String>>) mapDataAttribute.get("dimensionValuesDisplayData");
+
+        List<Map<String, Object>> dimensionValuesList = new ArrayList<>();
+
+        dimensionValuesDisplayData.forEach((key, value) -> {
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("asin", key);
+            for(int i = 0; i < dimensionValues.size(); i++) {
+                data.put(dimensionValues.get(i), value.get(i));
+            }
+
+            String name = StringUtils.join(value, " ");
+
+            dimensionValuesList.add(data);
+            data.put("images", colorImages.get(name));
+        });
+
+        Map<String, Object> mapData = new LinkedHashMap<>();
+        mapData.put("variationValues", mapDataAttribute.get("variationValues"));
+        mapData.put("selectedVariations", mapDataAttribute.get("selected_variations"));
+        mapData.put("dimensionValuesData", dimensionValuesList);
+
+        return mapData;
     }
 
     private Data toData(String id, String text, String img, String price, String rating, String comment, String site) {
