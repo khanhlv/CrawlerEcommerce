@@ -53,7 +53,7 @@ public class ThreadAmazonUkDetail implements Runnable {
                             logger.debug(this.threadName + "## GET_END [URL=" + data.getLink() + "][TIME=" + end  + "]");
 
                             if (content == null) {
-                                settingDAO.updateStatus("AMAZON_CO_UK_DETAIL", 0);
+                                settingDAO.updateStatus(Crawler.AMAZON_CO_UK.name(), 0);
 
                                 dataDAO.updateDataStatus(data.getId(), -1);
 
@@ -68,7 +68,7 @@ public class ThreadAmazonUkDetail implements Runnable {
                                 }
                             }
 
-                            Thread.sleep(100);
+                            Thread.sleep(200);
                         } catch (Exception ex) {
                             logger.error(this.threadName + " ## ERROR[" + data.getLink() + "]", ex);
                             dataDAO.updateDataStatus(data.getId(), -1);

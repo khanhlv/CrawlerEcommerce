@@ -1,9 +1,12 @@
 package com.crawler.ecommerce.parser;
 
-import com.crawler.ecommerce.core.UserAgent;
-import com.crawler.ecommerce.enums.Crawler;
-import com.crawler.ecommerce.model.Data;
-import com.google.gson.Gson;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Connection;
@@ -13,7 +16,11 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import com.crawler.ecommerce.core.UserAgent;
+import com.crawler.ecommerce.enums.Crawler;
+import com.crawler.ecommerce.model.Data;
+import com.crawler.ecommerce.util.AmazonUtil;
+import com.google.gson.Gson;
 
 public class AmazonUkParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonUkParser.class);
@@ -32,7 +39,7 @@ public class AmazonUkParser {
                 .timeout(30000)
                 .get();
 
-//        FileUtils.writeStringToFile(new File("data/html/" + code + ".html"), doc.html());
+        FileUtils.writeStringToFile(new File("data/html/" + code + ".html"), doc.html());
 
         if (doc.select("form").attr("action").equals("/errors/validateCaptcha")) {
             logger.debug("URL_DETAIL [{}] - VALIDATE_CAPTCHA", url);
@@ -46,7 +53,7 @@ public class AmazonUkParser {
             priceText = doc.select("span#priceblock_ourprice").text().trim();
         }
 
-        priceText = StringUtils.split(priceText, "-")[0];
+        priceText = StringUtils.isNotBlank(priceText) ? StringUtils.split(priceText, "-")[0] : "0";
 
         double price = NumberUtils.toDouble(priceText.replaceAll("\\s+", "").replaceAll("\\£", ""));
         String description = doc.select("div#feature-bullets").text();
@@ -58,7 +65,7 @@ public class AmazonUkParser {
 
         String propertiesElements = doc.select("script").toString();
 
-        Map<String, Object> mapData = properties(propertiesElements);
+        Map<String, Object> mapData = AmazonUtil.properties(propertiesElements);
 
         if (mapData.size() > 0) {
             dataMap.setProperties(new Gson().toJson(mapData));
@@ -78,61 +85,19 @@ public class AmazonUkParser {
 
         dataMap.setDescription(emotionless);
 
-//        System.out.println("--------------------");
-//        System.out.println(dataMap.getCode());
-//        System.out.println(dataMap.getPrice());
-//        System.out.println(dataMap.getRating());
-//        System.out.println(dataMap.getComment_count());
-//        System.out.println(dataMap.getShop());
-//        System.out.println(dataMap.getDescription());
-//        System.out.println(dataMap.getProperties());
+        System.out.println("--------------------");
+        System.out.println(dataMap.getCode());
+        System.out.println(dataMap.getPrice());
+        System.out.println(dataMap.getRating());
+        System.out.println(dataMap.getComment_count());
+        System.out.println(dataMap.getShop());
+        System.out.println(dataMap.getDescription());
+        System.out.println(dataMap.getProperties());
 
         logger.debug("URL_DETAIL [{}] PRICE[{}] RATE[{} - {}] SHOP[{}] PROPERTIES[{}]", url, dataMap.getPrice(), dataMap.getRating(),
                 dataMap.getComment_count(), dataMap.getShop(), StringUtils.isNotBlank(dataMap.getProperties()));
 
         return dataMap;
-    }
-
-    private Map<String, Object> properties(String dataInput) {
-        String dataAttribute = dataInput.substring(dataInput.indexOf("P.register('twister-js-init-dpx-data'"),
-                dataInput.indexOf("useDesktopTwisterMetaAsset"));
-        dataAttribute = dataAttribute.substring(dataAttribute.indexOf("var dataToReturn = ") + 19, dataAttribute.indexOf("return dataToReturn;") - 2);
-        dataAttribute = dataAttribute.replaceFirst("num_total_variations", UUID.randomUUID().toString());
-
-
-        String dataParseJSON = dataInput.substring(dataInput.indexOf("var obj = jQuery.parseJSON('") + 28, dataInput.indexOf("data" +
-                "[\"alwaysIncludeVideo\"]") - 4);
-
-        Map<String, Object> mapDataParseJSON = new Gson().fromJson(dataParseJSON, Map.class);
-
-        Map<String, Object> mapDataAttribute = new Gson().fromJson(dataAttribute, Map.class);
-
-        Map<String, Object> colorImages =  (Map<String, Object>) mapDataParseJSON.get("colorImages");
-
-        List<String> dimensionValues =  (List<String>) mapDataAttribute.get("dimensions");
-        Map<String, List<String>> dimensionValuesDisplayData =  (Map<String, List<String>>) mapDataAttribute.get("dimensionValuesDisplayData");
-
-        List<Map<String, Object>> dimensionValuesList = new ArrayList<>();
-
-        dimensionValuesDisplayData.forEach((key, value) -> {
-            Map<String, Object> data = new LinkedHashMap<>();
-            data.put("asin", key);
-            for(int i = 0; i < dimensionValues.size(); i++) {
-                data.put(dimensionValues.get(i), value.get(i));
-            }
-
-            String name = StringUtils.join(value, " ");
-
-            dimensionValuesList.add(data);
-            data.put("images", colorImages.get(name));
-        });
-
-        Map<String, Object> mapData = new LinkedHashMap<>();
-        mapData.put("variationValues", mapDataAttribute.get("variationValues"));
-        mapData.put("selectedVariations", mapDataAttribute.get("selected_variations"));
-        mapData.put("dimensionValuesData", dimensionValuesList);
-
-        return mapData;
     }
 
     private Data toData(String id, String text, String img, String price, String rating, String comment, String site) {
@@ -233,7 +198,7 @@ public class AmazonUkParser {
 
             AmazonUkParser amazonParser = new AmazonUkParser();
 //            amazonParser.readQuery("https://www.amazon.co.uk/s/query?rh=n%3A560798%2Cn%3A%21560800%2Cn%3A1345763031&page=32");
-            Data content = amazonParser.readDetail("https://www.amazon.co.uk/dp/B075ZTJ9XR", "B075ZTJ9XR", 1, setting);
+            Data content = amazonParser.readDetail("https://www.amazon.co.uk/dp/B083K8B3W4/?th=1", "B083K8B3W4", 1, setting);
         } catch (Exception e) {
             e.printStackTrace();
         }
