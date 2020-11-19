@@ -16,10 +16,12 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.crawler.ecommerce.core.Consts;
 import com.crawler.ecommerce.core.UserAgent;
 import com.crawler.ecommerce.enums.Crawler;
 import com.crawler.ecommerce.model.Data;
 import com.crawler.ecommerce.util.AmazonUtil;
+import com.crawler.ecommerce.util.ResourceUtil;
 import com.google.gson.Gson;
 
 public class AmazonUkParser {
@@ -36,10 +38,13 @@ public class AmazonUkParser {
                 .userAgent(userAgent)
                 .cookie("x-amz-captcha-2", mapCookies.get("x-amz-captcha-2"))
                 .cookie("x-amz-captcha-1", mapCookies.get("x-amz-captcha-1"))
-                .timeout(30000)
+                .timeout(Consts.TIMEOUT)
+                .maxBodySize(0)
                 .get();
 
-        FileUtils.writeStringToFile(new File("data/html/" + code + ".html"), doc.html());
+        if (ResourceUtil.getValue("debug").equals("true")) {
+            FileUtils.writeStringToFile(new File("data/html/" + code + ".html"), doc.html());
+        }
 
         if (doc.select("form").attr("action").equals("/errors/validateCaptcha")) {
             logger.debug("URL_DETAIL [{}] - VALIDATE_CAPTCHA", url);
@@ -85,14 +90,14 @@ public class AmazonUkParser {
 
         dataMap.setDescription(emotionless);
 
-        System.out.println("--------------------");
-        System.out.println(dataMap.getCode());
-        System.out.println(dataMap.getPrice());
-        System.out.println(dataMap.getRating());
-        System.out.println(dataMap.getComment_count());
-        System.out.println(dataMap.getShop());
-        System.out.println(dataMap.getDescription());
-        System.out.println(dataMap.getProperties());
+//        System.out.println("--------------------");
+//        System.out.println(dataMap.getCode());
+//        System.out.println(dataMap.getPrice());
+//        System.out.println(dataMap.getRating());
+//        System.out.println(dataMap.getComment_count());
+//        System.out.println(dataMap.getShop());
+//        System.out.println(dataMap.getDescription());
+//        System.out.println(dataMap.getProperties());
 
         logger.debug("URL_DETAIL [{}] PRICE[{}] RATE[{} - {}] SHOP[{}] PROPERTIES[{}]", url, dataMap.getPrice(), dataMap.getRating(),
                 dataMap.getComment_count(), dataMap.getShop(), StringUtils.isNotBlank(dataMap.getProperties()));
@@ -141,13 +146,18 @@ public class AmazonUkParser {
 
         Connection.Response resp = Jsoup.connect(url)
                 .userAgent(UserAgent.getUserAgent())
-                .timeout(30000)
+                .timeout(Consts.TIMEOUT)
                 .headers(mapHeader)
                 .ignoreContentType(true)
                 .method(Connection.Method.POST)
+                .maxBodySize(0)
                 .execute();
 
         String body = resp.body();
+
+        if (ResourceUtil.getValue("debug").equals("true")) {
+            FileUtils.writeStringToFile(new File("data/category/" + url.substring(url.lastIndexOf("?") + 1) + ".html"), body);
+        }
 
         String[] data = body.split("&&&");
 
