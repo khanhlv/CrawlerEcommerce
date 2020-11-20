@@ -74,6 +74,8 @@ public class ThreadAmazonComDetail implements Runnable {
                             dataDAO.updateDataStatus(data.getId(), -1);
                         }
                     }
+                } else {
+                    System.out.println(this.threadName + "## SETTING_WAITING ...");
                 }
 
                 Thread.sleep(1 * 30 * 1000);
