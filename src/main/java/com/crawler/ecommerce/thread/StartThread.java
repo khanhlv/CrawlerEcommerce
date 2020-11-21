@@ -17,15 +17,17 @@ public class StartThread {
                     new Thread(new ThreadShareQueue()).start();
                     Thread.sleep(5000);
 
-                    new Thread(new ThreadAmazonUkDetail(1)).start();
-
                     for (int i = 1; i <= threadCount; i++) {
                         new Thread(new ThreadAmazonUk(i)).start();
+                        new Thread(new ThreadAmazonUkDetail(i)).start();
                         Thread.sleep(5000);
                     }
                     break;
                 case SINGLE_DETAIL:
-                    new Thread(new ThreadAmazonUkDetail(1)).start();
+                    for (int i = 1; i <= threadCount; i++) {
+                        new Thread(new ThreadAmazonUkDetail(i)).start();
+                        Thread.sleep(5000);
+                    }
                     break;
                 case SINGLE_CATEGORY:
                     new Thread(new ThreadShareQueue()).start();
@@ -47,11 +49,15 @@ public class StartThread {
 
                     for (int i = 1; i <= threadCount; i++) {
                         new Thread(new ThreadAmazonCom(i)).start();
+                        new Thread(new ThreadAmazonComDetail(i)).start();
                         Thread.sleep(5000);
                     }
                     break;
                 case SINGLE_DETAIL:
-                    new Thread(new ThreadAmazonComDetail(1)).start();
+                    for (int i = 1; i <= threadCount; i++) {
+                        new Thread(new ThreadAmazonComDetail(i)).start();
+                        Thread.sleep(5000);
+                    }
                     break;
                 case SINGLE_CATEGORY:
                     new Thread(new ThreadShareQueue()).start();

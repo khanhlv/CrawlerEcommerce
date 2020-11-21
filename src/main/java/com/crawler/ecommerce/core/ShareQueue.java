@@ -1,18 +1,21 @@
 package com.crawler.ecommerce.core;
 
-import com.crawler.ecommerce.model.Queue;
-import com.crawler.ecommerce.util.ResourceUtil;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+
+import com.crawler.ecommerce.model.Data;
+import com.crawler.ecommerce.model.Queue;
+import com.crawler.ecommerce.util.ResourceUtil;
+
 public final class ShareQueue {
     public static ConcurrentLinkedDeque<String> shareQueue = new ConcurrentLinkedDeque<>();
+    public static ConcurrentLinkedDeque<Data> shareQueueItem = new ConcurrentLinkedDeque<>();
     public final static int QUEUE_SIZE = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.queue.size"));
     public final static int QUEUE_SIZE_LIMIT = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.queue.limit"));
 
