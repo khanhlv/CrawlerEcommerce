@@ -63,7 +63,7 @@ public class AmazonComParser {
         double price = NumberUtils.toDouble(priceText.replaceAll("\\s+", "").replaceAll("\\$", ""));
         String description = doc.select("div#feature-bullets").text();
 
-        String shop = doc.select("a#sellerProfileTriggerId").text().trim();
+        String shop = doc.select("span#tabular-buybox-truncate-1 span.tabular-buybox-text").text().trim();
         double rating = NumberUtils.toDouble(doc.select("span#acrPopover").attr("title").trim()
                 .replaceAll(" out of 5 stars", "").replaceAll("\\s+", ""));
         int count_comment = NumberUtils.toInt(doc.select("span#acrCustomerReviewText").get(0).text().trim().replaceAll("[^0-9]+", ""));
@@ -207,7 +207,7 @@ public class AmazonComParser {
                     "}";
             AmazonComParser amazonParser = new AmazonComParser();
 //            amazonParser.readQuery("https://www.amazon.com/s/query?bbn=16225009011&rh=n%3A16225009011%2Cn%3A281407&page=2");
-            Data content = amazonParser.readDetail("https://www.amazon.com/dp/B077ZMKWVM/", "B077ZMKWVM", 1, setting);
+            Data content = amazonParser.readDetail("https://www.amazon.com/dp/B086DBR6T7/", "B086DBR6T7", 1, setting);
         } catch (Exception e) {
             e.printStackTrace();
         }
