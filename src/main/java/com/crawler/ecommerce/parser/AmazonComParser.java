@@ -66,7 +66,13 @@ public class AmazonComParser {
         String shop = doc.select("span#tabular-buybox-truncate-1 span.tabular-buybox-text").text().trim();
         double rating = NumberUtils.toDouble(doc.select("span#acrPopover").attr("title").trim()
                 .replaceAll(" out of 5 stars", "").replaceAll("\\s+", ""));
-        int count_comment = NumberUtils.toInt(doc.select("span#acrCustomerReviewText").get(0).text().trim().replaceAll("[^0-9]+", ""));
+
+        int count_comment = 0;
+
+        Elements elementsComment = doc.select("span#acrCustomerReviewText");
+        if (elementsComment.size() > 0) {
+            count_comment = NumberUtils.toInt(elementsComment.get(0).text().trim().replaceAll("[^0-9]+", ""));
+        }
 
         String propertiesElements = doc.select("script").toString();
 

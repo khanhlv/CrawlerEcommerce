@@ -1,10 +1,7 @@
 package com.crawler.ecommerce.parser;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -66,7 +63,13 @@ public class AmazonUkParser {
         String shop = doc.select("span#tabular-buybox-truncate-1 span.tabular-buybox-text").text().trim();
         double rating = NumberUtils.toDouble(doc.select("span#acrPopover").attr("title").trim()
                 .replaceAll(" out of 5 stars", "").replaceAll("\\s+", ""));
-        int count_comment = NumberUtils.toInt(doc.select("span#acrCustomerReviewText").text().trim().replaceAll("[^0-9]+", ""));
+
+        int count_comment = 0;
+
+        Elements elementsComment = doc.select("span#acrCustomerReviewText");
+        if (elementsComment.size() > 0) {
+            count_comment = NumberUtils.toInt(elementsComment.get(0).text().trim().replaceAll("[^0-9]+", ""));
+        }
 
         String propertiesElements = doc.select("script").toString();
 

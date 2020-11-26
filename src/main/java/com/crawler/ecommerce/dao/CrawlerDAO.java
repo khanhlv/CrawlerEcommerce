@@ -21,6 +21,35 @@ public class CrawlerDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlerDAO.class);
 
+    public long countQueueCrawler() throws SQLException {
+        String sqlStory = "SELECT count(1) FROM " + ShareApplication.crawler.getTableQueue() + " WHERE `status` = 0";
+        try (Connection con = ConnectionPool.getTransactional();
+             PreparedStatement pStmt = con.prepareStatement(sqlStory);
+             ResultSet resultSet = pStmt.executeQuery()) {
+
+            if(resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (Exception ex) {
+            throw ex;
+        }
+
+        return 0;
+    }
+
+    public void updateAllQueueStatus(int status) throws SQLException {
+        String sqlStory = "UPDATE " + ShareApplication.crawler.getTableQueue() + " SET `status` = ?";
+        try (Connection con = ConnectionPool.getTransactional();
+             PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
+
+            pStmt.setInt(1, status);
+
+            pStmt.executeUpdate();
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
     public List<Crawler> crawlerList() throws SQLException {
 
         List<Crawler> crawlerList = new ArrayList<>();

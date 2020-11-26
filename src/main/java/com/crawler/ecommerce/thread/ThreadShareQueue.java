@@ -1,15 +1,20 @@
 package com.crawler.ecommerce.thread;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.crawler.ecommerce.core.ShareQueue;
 import com.crawler.ecommerce.dao.CrawlerDAO;
 import com.crawler.ecommerce.model.Queue;
+import com.crawler.ecommerce.util.ResourceUtil;
 
 public class ThreadShareQueue implements Runnable {
 
@@ -31,6 +36,26 @@ public class ThreadShareQueue implements Runnable {
 
                 ShareQueue.shareQueue.addAll(stringList);
             }
+
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    if (ShareQueue.shareQueue.size() == 0) {
+                        try {
+                            if (crawlerDAO.countQueueCrawler() == 0) {
+                                crawlerDAO.updateAllQueueStatus(0);
+                            }
+                        } catch (SQLException e) {
+
+                        }
+                    }
+                }
+            };
+
+            int time = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.queue.time"));
+
+            Timer timer = new Timer();
+            timer.schedule(timerTask, 0, time * 60 * 60 * 1000);
 
             while (true) {
                 if (ShareQueue.shareQueue.size() < ShareQueue.QUEUE_SIZE_LIMIT) {
