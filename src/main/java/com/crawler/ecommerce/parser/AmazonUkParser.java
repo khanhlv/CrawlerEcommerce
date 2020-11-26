@@ -1,8 +1,12 @@
 package com.crawler.ecommerce.parser;
 
-import java.io.File;
-import java.util.*;
-
+import com.crawler.ecommerce.core.Consts;
+import com.crawler.ecommerce.core.UserAgent;
+import com.crawler.ecommerce.enums.Crawler;
+import com.crawler.ecommerce.model.Data;
+import com.crawler.ecommerce.util.AmazonUtil;
+import com.crawler.ecommerce.util.ResourceUtil;
+import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -13,13 +17,11 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.crawler.ecommerce.core.Consts;
-import com.crawler.ecommerce.core.UserAgent;
-import com.crawler.ecommerce.enums.Crawler;
-import com.crawler.ecommerce.model.Data;
-import com.crawler.ecommerce.util.AmazonUtil;
-import com.crawler.ecommerce.util.ResourceUtil;
-import com.google.gson.Gson;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AmazonUkParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonUkParser.class);
@@ -75,8 +77,12 @@ public class AmazonUkParser {
 
         StringBuffer content = new StringBuffer();
 
-        Elements elementsProductDetail = doc.select("div#detailBulletsWrapper_feature_div");
+        Elements elementsProductDetail = doc.select("div#prodDetails");
+        elementsProductDetail.select("script").remove();
+        elementsProductDetail.select("style").remove();
         Elements elementsProductContent = doc.select("div#aplus");
+        elementsProductContent.select("script").remove();
+        elementsProductContent.select("style").remove();
 
         content.append(elementsProductDetail.html());
         content.append(elementsProductContent.html());

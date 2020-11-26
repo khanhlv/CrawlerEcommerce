@@ -1,8 +1,12 @@
 package com.crawler.ecommerce.parser;
 
-import java.io.File;
-import java.util.*;
-
+import com.crawler.ecommerce.core.Consts;
+import com.crawler.ecommerce.core.UserAgent;
+import com.crawler.ecommerce.enums.Crawler;
+import com.crawler.ecommerce.model.Data;
+import com.crawler.ecommerce.util.AmazonUtil;
+import com.crawler.ecommerce.util.ResourceUtil;
+import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -13,13 +17,11 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.crawler.ecommerce.core.Consts;
-import com.crawler.ecommerce.core.UserAgent;
-import com.crawler.ecommerce.enums.Crawler;
-import com.crawler.ecommerce.model.Data;
-import com.crawler.ecommerce.util.AmazonUtil;
-import com.crawler.ecommerce.util.ResourceUtil;
-import com.google.gson.Gson;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AmazonComParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonComParser.class);
@@ -75,8 +77,12 @@ public class AmazonComParser {
 
         StringBuffer content = new StringBuffer();
 
-        Elements elementsProductDetail = doc.select("div#detailBulletsWrapper_feature_div");
+        Elements elementsProductDetail = doc.select("div#prodDetails");
+        elementsProductDetail.select("script").remove();
+        elementsProductDetail.select("style").remove();
         Elements elementsProductContent = doc.select("div#aplus");
+        elementsProductContent.select("script").remove();
+        elementsProductContent.select("style").remove();
 
         content.append(elementsProductDetail.html());
         content.append(elementsProductContent.html());
@@ -115,6 +121,8 @@ public class AmazonComParser {
 //        System.out.println(dataMap.getShop());
 //        System.out.println(dataMap.getDescription());
 //        System.out.println(dataMap.getProperties());
+//        System.out.println(dataMap.getContent());
+//        System.out.println(dataMap.getCategory());
 
         logger.debug("URL_DETAIL [{}] PRICE[{}] RATE[{} - {}] SHOP[{}] PROPERTIES[{}]", url, dataMap.getPrice(), dataMap.getRating(),
                 dataMap.getComment_count(), dataMap.getShop(), StringUtils.isNotBlank(dataMap.getProperties()));
@@ -218,7 +226,7 @@ public class AmazonComParser {
     public static void main(String[] args) {
         try {
             String setting = "{\n" +
-                    "  \"userAgent\" : \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36\",\n" +
+                    "  \"userAgent\" : \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36\",\n" +
                     "  \"x-amz-captcha-2\" : \"PEce+/DomX9LQnj3wgdtWQ==\",\n" +
                     "  \"x-amz-captcha-1\" : \"1605337900184777\"\n" +
                     "}";
