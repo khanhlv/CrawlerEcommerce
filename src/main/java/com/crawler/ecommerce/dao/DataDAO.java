@@ -55,7 +55,7 @@ public class DataDAO {
 
     public void updateData(Data data, int status) throws SQLException {
         String sqlStory = "UPDATE " + ShareApplication.crawler.getTableData() + " SET `price` = ?, `properties` = ?, `description` = ?, `shop` = ?, `rating` = ?, `comment_count` = ?, `status` = ?, " +
-                "`updated_date` = now(), `update_agent` = ? WHERE `id` = ?";
+                "`updated_date` = now(), `update_agent` = ?, `category` = ?, `content` = ? WHERE `id` = ?";
         try (Connection con = ConnectionPool.getTransactional();
              PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
 
@@ -67,7 +67,9 @@ public class DataDAO {
             pStmt.setInt(6, data.getComment_count());
             pStmt.setInt(7, status);
             pStmt.setString(8, ShareApplication.crawlerAgent);
-            pStmt.setInt(9, data.getId());
+            pStmt.setString(9, data.getCategory());
+            pStmt.setString(10, data.getContent());
+            pStmt.setInt(11, data.getId());
 
 
             pStmt.executeUpdate();
