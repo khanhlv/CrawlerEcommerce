@@ -73,6 +73,18 @@ public class AmazonUkParser {
 
         String propertiesElements = doc.select("script").toString();
 
+        StringBuffer content = new StringBuffer();
+
+        Elements elementsProductDetail = doc.select("div#detailBulletsWrapper_feature_div");
+        Elements elementsProductContent = doc.select("div#aplus");
+
+        content.append(elementsProductDetail.html());
+        content.append(elementsProductContent.html());
+
+        Elements elementsProductCategory = doc.select("div#wayfinding-breadcrumbs_feature_div ul li a");
+        ArrayList<String> categoryList = new ArrayList<>();
+        elementsProductCategory.stream().forEach(v -> categoryList.add(v.text().trim()));
+
         Map<String, Object> mapData = AmazonUtil.properties(propertiesElements);
 
         if (mapData.size() > 0) {
@@ -87,6 +99,8 @@ public class AmazonUkParser {
         dataMap.setRating(rating);
         dataMap.setComment_count(count_comment);
         dataMap.setShop(shop);
+        dataMap.setContent(content.toString());
+        dataMap.setCategory(StringUtils.join(categoryList, "|"));
 
         String characterFilter = "[^\\p{L}\\p{M}\\p{N}\\p{P}\\p{Z}\\p{Cf}\\p{Cs}\\s]";
         String emotionless = description.replaceAll(characterFilter,"");

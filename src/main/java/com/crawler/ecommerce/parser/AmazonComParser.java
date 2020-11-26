@@ -1,10 +1,7 @@
 package com.crawler.ecommerce.parser;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -76,6 +73,18 @@ public class AmazonComParser {
 
         String propertiesElements = doc.select("script").toString();
 
+        StringBuffer content = new StringBuffer();
+
+        Elements elementsProductDetail = doc.select("div#detailBulletsWrapper_feature_div");
+        Elements elementsProductContent = doc.select("div#aplus");
+
+        content.append(elementsProductDetail.html());
+        content.append(elementsProductContent.html());
+
+        Elements elementsProductCategory = doc.select("div#wayfinding-breadcrumbs_feature_div ul li a");
+        ArrayList<String> categoryList = new ArrayList<>();
+        elementsProductCategory.stream().forEach(v -> categoryList.add(v.text().trim()));
+
         Map<String, Object> mapData = AmazonUtil.properties(propertiesElements);
 
         if (mapData.size() > 0) {
@@ -90,6 +99,8 @@ public class AmazonComParser {
         dataMap.setRating(rating);
         dataMap.setComment_count(count_comment);
         dataMap.setShop(shop);
+        dataMap.setContent(content.toString());
+        dataMap.setCategory(StringUtils.join(categoryList, "|"));
 
         String characterFilter = "[^\\p{L}\\p{M}\\p{N}\\p{P}\\p{Z}\\p{Cf}\\p{Cs}\\s]";
         String emotionless = description.replaceAll(characterFilter,"");
