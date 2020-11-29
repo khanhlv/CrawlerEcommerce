@@ -1,8 +1,8 @@
 package com.crawler.ecommerce.thread;
 
-
 import com.crawler.ecommerce.enums.Crawler;
 import com.crawler.ecommerce.enums.ThreadMod;
+import com.crawler.ecommerce.proxy.ProxyProvider;
 import com.crawler.ecommerce.thread.amazon.co.uk.ThreadAmazonUk;
 import com.crawler.ecommerce.thread.amazon.co.uk.ThreadAmazonUkDetail;
 import com.crawler.ecommerce.thread.amazon.com.ThreadAmazonCom;
@@ -24,6 +24,8 @@ public class StartThread {
                     }
                     break;
                 case SINGLE_DETAIL:
+                    ProxyProvider.setup();
+
                     for (int i = 1; i <= threadCount; i++) {
                         new Thread(new ThreadAmazonUkDetail(i)).start();
                         Thread.sleep(5000);
@@ -54,6 +56,8 @@ public class StartThread {
                     }
                     break;
                 case SINGLE_DETAIL:
+                    ProxyProvider.setup();
+
                     for (int i = 1; i <= threadCount; i++) {
                         new Thread(new ThreadAmazonComDetail(i)).start();
                         Thread.sleep(5000);

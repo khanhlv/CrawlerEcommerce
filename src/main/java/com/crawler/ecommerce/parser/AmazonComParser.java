@@ -18,36 +18,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.*;
 
 public class AmazonComParser {
     private static final Logger logger = LoggerFactory.getLogger(AmazonComParser.class);
 
-    public Data readDetail(String url, String code, int id, String settingValue) throws Exception {
+    public Data readDetail(String url, String code, int id, InetSocketAddress socketAddress) throws Exception {
         Data dataMap = new Data();
 
-        Map<String, String> mapCookies = new Gson().fromJson(settingValue, Map.class);
-
-        String userAgent = mapCookies.get("userAgent");
-
-        Document doc = Jsoup.connect(url)
-                .userAgent(userAgent)
-                .cookie("x-amz-captcha-2", mapCookies.get("x-amz-captcha-2"))
-                .cookie("x-amz-captcha-1", mapCookies.get("x-amz-captcha-1"))
+        Connection connection = Jsoup.connect(url)
+                .userAgent(UserAgent.getUserAgent())
                 .timeout(Consts.TIMEOUT)
-                .maxBodySize(0)
-                .get();
+                .maxBodySize(0);
+
+        if (socketAddress != null) {
+            connection.proxy(new Proxy(Proxy.Type.HTTP, socketAddress));
+        }
+
+        Document doc = connection.get();
 
         if (ResourceUtil.getValue("debug").equals("true")) {
             FileUtils.writeStringToFile(new File("data/html/" + code + ".html"), doc.html());
         }
 
         if (doc.select("form").attr("action").equals("/errors/validateCaptcha")) {
-            logger.debug("URL_DETAIL [{}] - VALIDATE_CAPTCHA", url);
-
+//            logger.debug("PROXY [{}] URL_DETAIL [{}] - VALIDATE_CAPTCHA", (socketAddress != null ? socketAddress.toString() : "N/A"), url);
             return null;
         }
 
@@ -124,8 +121,8 @@ public class AmazonComParser {
 //        System.out.println(dataMap.getContent());
 //        System.out.println(dataMap.getCategory());
 
-        logger.debug("URL_DETAIL [{}] PRICE[{}] RATE[{} - {}] SHOP[{}] PROPERTIES[{}]", url, dataMap.getPrice(), dataMap.getRating(),
-                dataMap.getComment_count(), dataMap.getShop(), StringUtils.isNotBlank(dataMap.getProperties()));
+        logger.debug("PROXY [{}] URL_DETAIL [{}] PRICE[{}] RATE[{} - {}] SHOP[{}] PROPERTIES[{}]", (socketAddress != null ? socketAddress.toString() : "N/A"),
+                url, dataMap.getPrice(), dataMap.getRating(), dataMap.getComment_count(), dataMap.getShop(), StringUtils.isNotBlank(dataMap.getProperties()));
 
         return dataMap;
     }
@@ -225,14 +222,9 @@ public class AmazonComParser {
 
     public static void main(String[] args) {
         try {
-            String setting = "{\n" +
-                    "  \"userAgent\" : \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36\",\n" +
-                    "  \"x-amz-captcha-2\" : \"PEce+/DomX9LQnj3wgdtWQ==\",\n" +
-                    "  \"x-amz-captcha-1\" : \"1605337900184777\"\n" +
-                    "}";
             AmazonComParser amazonParser = new AmazonComParser();
 //            amazonParser.readQuery("https://www.amazon.com/s/query?bbn=16225009011&rh=n%3A16225009011%2Cn%3A281407&page=2");
-            Data content = amazonParser.readDetail("https://www.amazon.com/dp/B086DBR6T7/", "B086DBR6T7", 1, setting);
+            Data content = amazonParser.readDetail("https://www.amazon.com/dp/B086DBR6T7/", "B086DBR6T7", 1, null);
         } catch (Exception e) {
             e.printStackTrace();
         }

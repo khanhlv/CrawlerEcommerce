@@ -1,21 +1,23 @@
 package com.crawler.ecommerce.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-
 import com.crawler.ecommerce.model.Data;
 import com.crawler.ecommerce.model.Queue;
 import com.crawler.ecommerce.util.ResourceUtil;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public final class ShareQueue {
     public static ConcurrentLinkedDeque<String> shareQueue = new ConcurrentLinkedDeque<>();
     public static ConcurrentLinkedDeque<Data> shareQueueItem = new ConcurrentLinkedDeque<>();
+    public static List<InetSocketAddress> socketAddressList = new LinkedList<>();
     public final static int QUEUE_SIZE = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.queue.size"));
     public final static int QUEUE_SIZE_LIMIT = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.queue.limit"));
 
@@ -27,6 +29,12 @@ public final class ShareQueue {
                     shareQueue.add(link);
                 }
             }
+        }
+    }
+
+    public static void addQueueItem(List<Data> dataList) {
+        if (ShareQueue.shareQueueItem.size() == 0) {
+            ShareQueue.shareQueueItem.addAll(dataList);
         }
     }
 
