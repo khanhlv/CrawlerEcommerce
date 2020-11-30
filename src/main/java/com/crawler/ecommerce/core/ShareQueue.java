@@ -32,12 +32,6 @@ public final class ShareQueue {
         }
     }
 
-    public static void addQueueItem(List<Data> dataList) {
-        if (ShareQueue.shareQueueItem.size() == 0) {
-            ShareQueue.shareQueueItem.addAll(dataList);
-        }
-    }
-
     public static List<String> getItem() throws IOException {
         List<String> listItem = new ArrayList<>();
 

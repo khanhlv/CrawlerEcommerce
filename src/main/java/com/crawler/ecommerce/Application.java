@@ -21,9 +21,7 @@ public class Application {
             ShareApplication.crawler = Crawler.valueOf(crawler);
             ShareApplication.crawlerAgent = crawlerAgent;
 
-            int threadCount = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.queue.thread"), 1);
-
-            new StartThread().execute(threadCount, Crawler.valueOf(crawler), ThreadMod.valueOf(threadMod));
+            new StartThread().execute(Crawler.valueOf(crawler), ThreadMod.valueOf(threadMod));
         } else {
             System.out.println("CRAWLER: AMAZON_CO_UK, AMAZON_COM");
             System.out.println("THREAD_MOD:  ALL, SINGLE_DETAIL, SINGLE_CATEGORY");

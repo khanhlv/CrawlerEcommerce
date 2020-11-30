@@ -108,7 +108,7 @@ public class AmazonComParser {
         String characterFilter = "[^\\p{L}\\p{M}\\p{N}\\p{P}\\p{Z}\\p{Cf}\\p{Cs}\\s]";
         String emotionless = description.replaceAll(characterFilter,"");
 
-        dataMap.setDescription(emotionless);
+        dataMap.setDescription(StringUtils.substring(emotionless, 0, 4000));
 
 //        System.out.println("--------------------");
 //        System.out.println(dataMap.getCode());
@@ -168,7 +168,7 @@ public class AmazonComParser {
 
         Connection.Response resp = Jsoup.connect(url)
                 .userAgent(UserAgent.getUserAgent())
-                .timeout(Consts.TIMEOUT)
+                .timeout(Consts.TIMEOUT_CATEGORY)
                 .headers(mapHeader)
                 .ignoreContentType(true)
                 .method(Connection.Method.POST)

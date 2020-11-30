@@ -1,19 +1,18 @@
 package com.crawler.ecommerce.thread.amazon.com;
 
 
-import java.net.InetSocketAddress;
-import java.sql.SQLException;
-import java.util.List;
-
-import org.apache.commons.lang3.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.crawler.ecommerce.core.ShareQueue;
 import com.crawler.ecommerce.dao.DataDAO;
 import com.crawler.ecommerce.model.Data;
 import com.crawler.ecommerce.parser.AmazonComParser;
 import com.crawler.ecommerce.util.ResourceUtil;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.sql.SQLException;
+import java.util.List;
 
 public class ThreadAmazonComDetail implements Runnable {
 
@@ -32,13 +31,13 @@ public class ThreadAmazonComDetail implements Runnable {
     public void run() {
         try {
             while (true) {
-
                 if (ShareQueue.shareQueueItem.size() == 0) {
+
                     int limit = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.limit"));
 
                     List<Data> contentList = dataDAO.queueList(limit);
 
-                    ShareQueue.addQueueItem(contentList);
+                    ShareQueue.shareQueueItem.addAll(contentList);
                 }
 
                 List<InetSocketAddress> inetSocketAddresses = ShareQueue.socketAddressList;
