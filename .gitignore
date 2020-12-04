@@ -9,6 +9,7 @@ target/
 *.jar
 *.war
 *.ear
+*.log
 
 ### Setting
 *.classpath

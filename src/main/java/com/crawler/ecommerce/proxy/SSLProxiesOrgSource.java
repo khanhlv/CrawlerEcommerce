@@ -15,7 +15,7 @@ public class SSLProxiesOrgSource {
 
     private static final Logger logger = LoggerFactory.getLogger(SSLProxiesOrgSource.class);
 
-    public List<InetSocketAddress> proxy() {
+    public static List<InetSocketAddress> proxy() {
 
         final List<InetSocketAddress> proxies = new ArrayList<>();
 

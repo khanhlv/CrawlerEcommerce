@@ -14,7 +14,7 @@ import java.util.List;
 public class FPLNetSource {
     private static final Logger logger = LoggerFactory.getLogger(FPLNetSource.class);
 
-    public List<InetSocketAddress> proxy() {
+    public static List<InetSocketAddress> proxy() {
         final List<InetSocketAddress> proxies = new ArrayList<>();
 
         try {
