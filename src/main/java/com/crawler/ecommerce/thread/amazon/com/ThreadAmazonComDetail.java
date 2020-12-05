@@ -30,51 +30,57 @@ public class ThreadAmazonComDetail implements Runnable {
     public void run() {
         try {
             while (true) {
-                List<InetSocketAddress> inetSocketAddresses = ProxyProvider.proxyList();
 
-                if (inetSocketAddresses != null && inetSocketAddresses.size() > 0) {
-                    Data data = ShareQueue.shareQueueItem.poll();
 
-                    try {
-                        logger.debug(this.threadName + " GET_START [{}]", data.getLink());
+                if (ShareQueue.shareQueueItem.size() > 0) {
+                    List<InetSocketAddress> inetSocketAddresses = ProxyProvider.proxyList();
 
-                        long start = System.currentTimeMillis();
+                    if (inetSocketAddresses != null && inetSocketAddresses.size() > 0) {
+                        Data data = ShareQueue.shareQueueItem.poll();
 
-                        boolean hasContent = false;
+                        try {
+                            logger.debug(this.threadName + " GET_START [{}]", data.getLink());
 
-                        for (InetSocketAddress socketAddress : inetSocketAddresses) {
-                            Data content = null;
-                            try {
-                                content = amazonParser.readDetail(data.getLink(), data.getCode(), data.getId(), socketAddress);
-                            } catch (Exception ex) {
+                            long start = System.currentTimeMillis();
 
-                            }
+                            boolean hasContent = false;
 
-                            if (content != null) {
-                                if (content.getPrice() > 0) {
-                                    dataDAO.updateData(content, 1);
-                                } else {
-                                    content.setPrice(data.getPrice());
+                            for (InetSocketAddress socketAddress : inetSocketAddresses) {
+                                Data content = null;
+                                try {
+                                    content = amazonParser.readDetail(data.getLink(), data.getCode(), data.getId(), socketAddress);
+                                } catch (Exception ex) {
 
-                                    dataDAO.updateData(content, 1);
                                 }
-                                hasContent = true;
-                                break;
-                            }
-                        }
 
-                        if (!hasContent) {
+                                if (content != null) {
+                                    if (content.getPrice() > 0) {
+                                        dataDAO.updateData(content, 1);
+                                    } else {
+                                        content.setPrice(data.getPrice());
+
+                                        dataDAO.updateData(content, 1);
+                                    }
+                                    hasContent = true;
+                                    break;
+                                }
+                            }
+
+                            if (!hasContent) {
+                                dataDAO.updateDataStatus(data.getId(), -1);
+                            }
+
+                            long end = System.currentTimeMillis() - start;
+
+                            logger.debug(this.threadName + " GET_END [{}] TIME[{}] SIZE[{}]", data.getLink(), end, ShareQueue.shareQueueItem.size());
+
+                        } catch (SQLException ex) {
+                            logger.error(this.threadName + " ERROR[{}]", data.getLink(), ex);
                             dataDAO.updateDataStatus(data.getId(), -1);
                         }
-
-                        long end = System.currentTimeMillis() - start;
-
-                        logger.debug(this.threadName + " GET_END [{}] TIME[{}] SIZE[{}]", data.getLink(), end, ShareQueue.shareQueueItem.size());
-
-                    } catch (SQLException ex) {
-                        logger.error(this.threadName + " ERROR[{}]", data.getLink(), ex);
-                        dataDAO.updateDataStatus(data.getId(), -1);
                     }
+                } else {
+                    System.out.println(this.threadName + "_WAITING......");
                 }
             }
         } catch (Exception ex) {

@@ -31,13 +31,13 @@ public class ProxyProvider {
 
         USProxySource.proxy().stream().forEach(data -> addProxyItem(data));
 
-        ProxyScanSource.proxy().stream().forEach(data -> addProxyItem(data));
-
-        ProxyScrapeSource.proxy().stream().forEach(data -> addProxyItem(data));
-
         ProxyDBSource.proxy().stream().forEach(data -> addProxyItem(data));
 
         ProxyNovaSource.proxy().stream().forEach(data -> addProxyItem(data));
+
+        ProxyScanSource.proxy().stream().forEach(data -> addProxyItem(data));
+
+        ProxyScrapeSource.proxy().stream().forEach(data -> addProxyItem(data));
 
         logger.debug("PROXY_SIZE [{}]" , ShareQueue.socketAddressList.size());
     }
