@@ -4,6 +4,7 @@ import com.crawler.ecommerce.core.Consts;
 import com.crawler.ecommerce.core.UserAgent;
 import com.crawler.ecommerce.enums.Crawler;
 import com.crawler.ecommerce.model.Data;
+import com.crawler.ecommerce.proxy.ProxyProvider;
 import com.crawler.ecommerce.util.AmazonUtil;
 import com.crawler.ecommerce.util.ResourceUtil;
 import com.google.gson.Gson;
@@ -224,7 +225,21 @@ public class AmazonComParser {
         try {
             AmazonComParser amazonParser = new AmazonComParser();
 //            amazonParser.readQuery("https://www.amazon.com/s/query?bbn=16225009011&rh=n%3A16225009011%2Cn%3A281407&page=2");
-            Data content = amazonParser.readDetail("https://www.amazon.com/dp/B086DBR6T7/", "B086DBR6T7", 1, null);
+
+            ProxyProvider.setup();
+
+            List<InetSocketAddress> inetSocketAddresses = ProxyProvider.proxyList();
+            for (InetSocketAddress socketAddress : inetSocketAddresses) {
+                try {
+                    Data content = amazonParser.readDetail("https://www.amazon.com/dp/B086DBR6T7/", "B086DBR6T7", 1, socketAddress);
+                    break;
+                } catch (Exception ex) {
+                    System.out.println("ERROR_" + socketAddress.toString());
+                }
+
+
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

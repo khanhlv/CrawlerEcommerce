@@ -27,7 +27,7 @@ public class StartThread {
         if (Crawler.AMAZON_CO_UK.equals(crawler)) {
             switch (threadMod) {
                 case SINGLE_DETAIL:
-                    ProxyProvider.setup();
+                    ProxyProvider.startThread();
 
                     queueItem();
 
@@ -51,7 +51,7 @@ public class StartThread {
         if (Crawler.AMAZON_COM.equals(crawler)) {
             switch (threadMod) {
                 case SINGLE_DETAIL:
-                    ProxyProvider.setup();
+                    ProxyProvider.startThread();
 
                     queueItem();
 

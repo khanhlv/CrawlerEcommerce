@@ -5,6 +5,7 @@ import com.crawler.ecommerce.core.ShareQueue;
 import com.crawler.ecommerce.dao.DataDAO;
 import com.crawler.ecommerce.model.Data;
 import com.crawler.ecommerce.parser.AmazonComParser;
+import com.crawler.ecommerce.proxy.ProxyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ public class ThreadAmazonComDetail implements Runnable {
     public void run() {
         try {
             while (true) {
-                List<InetSocketAddress> inetSocketAddresses = ShareQueue.socketAddressList;
+                List<InetSocketAddress> inetSocketAddresses = ProxyProvider.proxyList();
 
                 if (inetSocketAddresses != null && inetSocketAddresses.size() > 0) {
                     Data data = ShareQueue.shareQueueItem.poll();
@@ -75,8 +76,6 @@ public class ThreadAmazonComDetail implements Runnable {
                         dataDAO.updateDataStatus(data.getId(), -1);
                     }
                 }
-
-                Thread.sleep(500);
             }
         } catch (Exception ex) {
             logger.error(this.threadName + " ## ERROR[ThreadAmazonComDetail]", ex);

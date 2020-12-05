@@ -3,21 +3,25 @@ package com.crawler.ecommerce.proxy;
 import com.crawler.ecommerce.core.Consts;
 import com.crawler.ecommerce.core.ShareQueue;
 import com.crawler.ecommerce.core.UserAgent;
+import com.crawler.ecommerce.util.ResourceUtil;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.util.ArrayList;
+import java.util.*;
 
 public class ProxyProvider {
     private static final Logger logger = LoggerFactory.getLogger(ProxyProvider.class);
 
-    static  ArrayList<String> duplicateStrings;
+    static  ArrayList<String> duplicateStrings = new ArrayList();
 
     public static void setup() {
-        duplicateStrings = new ArrayList();
+        duplicateStrings.clear();
+
+        ShareQueue.socketAddressList.clear();
 
         SSLProxiesOrgSource.proxy().stream().forEach(data -> addProxyItem(data));
 
@@ -26,6 +30,10 @@ public class ProxyProvider {
         FPLNetSource.proxy().stream().forEach(data -> addProxyItem(data));
 
         USProxySource.proxy().stream().forEach(data -> addProxyItem(data));
+
+        ProxyScanSource.proxy().stream().forEach(data -> addProxyItem(data));
+
+        ProxyScrapeSource.proxy().stream().forEach(data -> addProxyItem(data));
 
         ProxyDBSource.proxy().stream().forEach(data -> addProxyItem(data));
 
@@ -40,6 +48,27 @@ public class ProxyProvider {
 
             ShareQueue.socketAddressList.add(data);
         }
+    }
+
+    public static List<InetSocketAddress> proxyList() {
+        List<InetSocketAddress> socketAddresses = new LinkedList<>();
+        socketAddresses.addAll(ShareQueue.socketAddressList);
+
+        return socketAddresses;
+    }
+
+    public static void startThread() {
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                setup();
+            }
+        };
+
+        int time = NumberUtils.toInt(ResourceUtil.getValue("data.crawler.proxy.time"));
+
+        Timer timer = new Timer();
+        timer.schedule(timerTask, 0, time * 60 * 1000);
     }
 
     public static boolean isProxyOnline(InetSocketAddress socketAddress) {
