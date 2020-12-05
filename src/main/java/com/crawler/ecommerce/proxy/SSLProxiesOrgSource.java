@@ -28,8 +28,6 @@ public class SSLProxiesOrgSource {
             Elements ports = html.select("table td:eq(1)");
             Elements protocols = html.select("table td:eq(6)");
 
-
-
             for (int i = 0; i < addrs.size(); i++) {
                 if ("yes".equals(protocols.get(i).text())) {
                     proxies.add(new InetSocketAddress(addrs.get(i).text(), Integer.parseInt(ports.get(i).text())));

@@ -14,15 +14,17 @@ public class ProxyProvider {
     public static void setup() {
         duplicateStrings = new ArrayList();
 
-        ProxyDBSource.proxy().stream().forEach(data -> addProxyItem(data));
-
-        ProxyNovaSource.proxy().stream().forEach(data -> addProxyItem(data));
+        SSLProxiesOrgSource.proxy().stream().forEach(data -> addProxyItem(data));
 
         HideMySource.proxy().stream().forEach(data -> addProxyItem(data));
 
-        SSLProxiesOrgSource.proxy().stream().forEach(data -> addProxyItem(data));
-
         FPLNetSource.proxy().stream().forEach(data -> addProxyItem(data));
+
+        USProxySource.proxy().stream().forEach(data -> addProxyItem(data));
+
+        ProxyDBSource.proxy().stream().forEach(data -> addProxyItem(data));
+
+        ProxyNovaSource.proxy().stream().forEach(data -> addProxyItem(data));
 
         logger.debug("PROXY_SIZE [{}]" , ShareQueue.socketAddressList.size());
     }
